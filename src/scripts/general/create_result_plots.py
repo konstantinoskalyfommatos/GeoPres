@@ -1,7 +1,17 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+from matplotlib.patches import Patch
 import os
 from utils.config import EVALUATION_RESULTS_PATH, PROJECT_ROOT
+
+
+def get_desired_dimensions(model_base_name):
+    """Return the list of desired dimensions for grouping."""
+    if 'gte-multilingual' in model_base_name or "all-mpnet-base-v2" in model_base_name:
+        return [32, 64, 128, 256, 768]
+    elif 'jina-embeddings-v2-small-en' in model_base_name:
+        return [32, 64, 128, 256, 512]
+    raise ValueError(f"Unknown model base name: {model_base_name}")
 
 
 def extract_embedding_dim(model_name):
@@ -10,16 +20,29 @@ def extract_embedding_dim(model_name):
         parts = model_name.split('_distilled_')
         dim_part = parts[1].split('_')[0]
         return int(dim_part)
-    # Assume base models have their original dimensions
-    elif 'gte-multilingual-base' in model_name:
-        return 768  # GTE base dimension
+
+    elif 'gte-multilingual-base' in model_name  or "all-mpnet-base-v2" in model_name:
+        return 768
     elif 'jina-embeddings-v2-small-en' in model_name:
-        return 512  # Jina v2 small dimension
-    return None
+        return 512
+    raise ValueError(f"Unknown model name format: {model_name}")
+
+
+def get_grouped_dimension(dim, desired_dims):
+    """Map actual dimension to the nearest desired dimension for grouping."""
+    for d in desired_dims:
+        if dim <= d:
+            return d
+    return desired_dims[-1]
+
 
 def extract_method(model_name):
-    """Extract distillation method from model name."""
-    if 'batch' in model_name:
+    """Extract dimensionality reduction method from model name."""
+    
+    if '_distilled_' not in model_name:
+        return 'base'
+    
+    if 'batch_20000_poslossfactor_1' in model_name and "weighted" not in model_name:
         return 'custom'
     elif '_pca' in model_name:
         return 'pca'
@@ -29,179 +52,126 @@ def extract_method(model_name):
         return 'random_selection'
     elif 'truncation' in model_name:
         return 'truncation'
-    return 'base'
-
-def plot_model_performance(
-    model_base_name, 
-    df, 
-    output_dir,
-    task_columns
-):
-    """Create performance plots for a specific model with different methods."""
-    # Filter rows for this model
-    model_data = df[df['Model'].str.contains(model_base_name.replace('/', '__'))]
-    
-    # Extract dimensions and methods
-    model_data = model_data.copy()
-    model_data['dimension'] = model_data['Model'].apply(extract_embedding_dim)
-    model_data['method'] = model_data['Model'].apply(extract_method)
-    model_data = model_data.dropna(subset=['dimension'])
-    
-    if len(model_data) == 0:
-        print(f"No data found for model: {model_base_name}")
-        return
-    
-    # Get all unique dimensions for this model
-    all_dimensions = sorted(model_data['dimension'].unique())
-    
-    # Create plots for each task
-    fig, axes = plt.subplots(2, 3, figsize=(30, 12))
-    fig.suptitle(f'Performance vs Embedding Dimension: {model_base_name}', fontsize=16, fontweight='bold')
-    
-    axes = axes.flatten()
-    
-    # Define colors and markers for each method
-    colors = {'custom': 'blue', 'pca': 'red', 'random_projection': 'green', 
-              'random_selection': 'orange', 'truncation': 'purple', 'base': 'black'}
-    markers = {'custom': 'o', 'pca': 's', 'random_projection': '^', 
-               'random_selection': 'D', 'truncation': 'v', 'base': '*'}
-    
-    for idx, (task_name, column_name) in enumerate(task_columns.items()):
-        ax = axes[idx]
-        
-        # Collect all values for this task to determine y-axis range
-        task_values = []
-        
-        # Plot each method separately
-        for method_key, method_name in distillation_methods.items():
-            method_data = model_data[model_data['method'] == method_key].sort_values('dimension')
-            
-            if len(method_data) > 0:
-                ax.plot(method_data['dimension'], method_data[column_name], 
-                       marker=markers[method_key], linewidth=2, markersize=8, 
-                       label=method_name, color=colors[method_key], alpha=0.7)
-                task_values.extend(method_data[column_name].tolist())
-        
-        # Plot base model as a horizontal line if it exists
-        base_data = model_data[model_data['method'] == 'base']
-        if len(base_data) > 0:
-            base_score = base_data[column_name].values[0]
-            base_dim = base_data['dimension'].values[0]
-            ax.axhline(y=base_score, color=colors['base'], linestyle='--', 
-                      linewidth=2, label=f'Base Model (dim={int(base_dim)})', alpha=0.7)
-            ax.plot(base_dim, base_score, marker=markers['base'], 
-                   markersize=12, color=colors['base'])
-            task_values.append(base_score)
-        
-        ax.set_xlabel('Embedding Dimension', fontsize=11)
-        ax.set_ylabel('Score', fontsize=11)
-        ax.set_title(f'{task_name} Method Comparison', fontsize=12, fontweight='bold')
-        ax.grid(True, alpha=0.3)
-        ax.legend(fontsize=8, loc='best')
-        
-        # Set x-axis ticks to actual dimensions
-        ax.set_xticks(all_dimensions)
-        ax.set_xticklabels([int(d) for d in all_dimensions])
-        # Stretch x-axis while preserving linear ratios between dimensions
-        ax.set_xlim(all_dimensions[0], all_dimensions[-1])
-        ax.margins(x=0)
-        
-        # Set y-axis limits with padding
-        if task_values:
-            y_min, y_max = min(task_values), max(task_values)
-            padding = (y_max - y_min) * 0.1
-            ax.set_ylim([max(0, y_min - padding), min(1, y_max + padding)])
-    
-    # Remove the extra subplot
-    fig.delaxes(axes[5])
-    
-    plt.tight_layout()
-    
-    # Save the plot
-    safe_model_name = model_base_name.replace('/', '_')
-    output_path = os.path.join(output_dir, f'{safe_model_name}_method_comparison.png')
-    plt.savefig(output_path, dpi=300, bbox_inches='tight')
-    print(f"Saved plot: {output_path}")
-    plt.close()
+    elif 'autoencoder' in model_name:
+        return 'autoencoder'
+    return None
 
 
-def create_method_comparison_plots(
-    df, 
+def create_grouped_bar_plots(
+    df,
     output_dir,
     task_columns,
     models
 ):
-    """Create separate plots comparing methods for each task, per model."""
-    colors = {'custom': 'blue', 'pca': 'red', 'random_projection': 'green', 
-              'random_selection': 'orange', 'truncation': 'purple', 'base': 'black'}
-    markers = {'custom': 'o', 'pca': 's', 'random_projection': '^', 
-               'random_selection': 'D', 'truncation': 'v', 'base': '*'}
-    
-    for model_base_name in models:
-        model_short = model_base_name.split('/')[-1]
+    """Create grouped bar charts for each task, grouped by dimensions."""
+    colors = {
+        'custom': '#1f77b4',      # Blue (Tableau)
+        'pca': '#d62728',         # Red (Tableau)
+        'random_projection': '#2ca02c',  # Green (Tableau)
+        'random_selection': '#ff7f0e',   # Orange (Tableau)
+        'truncation': '#9467bd',   # Purple (Tableau)
+        'base': '#17becf',        # Cyan (Tableau)
+        'autoencoder': '#bcbd22'   # Olive (Tableau)
+    }
+
+    for model_base_name, include_in_mlr in models.items():
+        truncation_label = 'Truncation (Matryoshka)' if include_in_mlr else 'Truncation'
+        model_dim_reduction_methods = {
+            'custom': 'ALDRL (Ours)',
+            'pca': 'PCA',
+            'random_projection': 'Random Projection',
+            'random_selection': 'Random Selection',
+            'truncation': truncation_label,
+            'autoencoder': 'Autoencoder'
+        }
+        desired_dims = get_desired_dimensions(model_base_name)
         model_data = df[df['Model'].str.contains(model_base_name.replace('/', '__'))]
         model_data = model_data.copy()
         model_data['dimension'] = model_data['Model'].apply(extract_embedding_dim)
         model_data['method'] = model_data['Model'].apply(extract_method)
+        model_data['grouped_dim'] = model_data['dimension'].apply(
+            lambda x: get_grouped_dimension(x, desired_dims)
+        )
         model_data = model_data.dropna(subset=['dimension'])
-        
+        model_data = model_data[model_data['dimension'] != 2]
+        valid_methods = ['base', 'custom', 'pca', 'random_projection', 'random_selection', 'truncation', 'autoencoder']
+        model_data = model_data[model_data['method'].isin(valid_methods)]
+
         if len(model_data) == 0:
             print(f"No data found for model: {model_base_name}")
             continue
-        
-        all_dimensions = sorted(model_data['dimension'].unique())
-        
+
         for task_name, column_name in task_columns.items():
-            fig, ax = plt.subplots(figsize=(20, 8))
-            fig.suptitle(f'{task_name} Performance: {model_base_name}', fontsize=16, fontweight='bold')
-            
-            task_values = []
-            
-            # Plot base model as horizontal reference line
+            fig, ax = plt.subplots(figsize=(14, 8))
+            fig.suptitle(f'{task_name} by Dimension: {model_base_name}', 
+                         fontsize=16, fontweight='bold')
+
+            bar_width = 0.12
+            x_positions = range(len(desired_dims))
+
+            all_values = {}
+            for method_key, method_name in model_dim_reduction_methods.items():
+                method_data = model_data[model_data['method'] == method_key]
+                values = []
+                for dim in desired_dims:
+                    dim_data = method_data[method_data['grouped_dim'] == dim]
+                    if len(dim_data) > 0:
+                        values.append(dim_data[column_name].values[0])
+                    else:
+                        values.append(0)
+                all_values[method_key] = values
+
             base_data = model_data[model_data['method'] == 'base']
-            if len(base_data) > 0:
-                base_score = base_data[column_name].values[0]
-                base_dim = base_data['dimension'].values[0]
-                ax.axhline(y=base_score, color=colors['base'], linestyle='--', 
-                          linewidth=2, label=f'Base Model (dim={int(base_dim)})', alpha=0.7)
-                ax.plot(base_dim, base_score, marker=markers['base'], 
-                       markersize=12, color=colors['base'])
-                task_values.append(base_score)
-            
-            for method_key, method_name in distillation_methods.items():
-                method_data = model_data[model_data['method'] == method_key].sort_values('dimension')
-                
-                if len(method_data) > 0:
-                    ax.plot(method_data['dimension'], method_data[column_name], 
-                           marker=markers[method_key], linewidth=2.5, markersize=8, 
-                           label=method_name, color=colors[method_key], alpha=0.8)
-                    task_values.extend(method_data[column_name].tolist())
-            
+            base_score = base_data[column_name].values[0] if len(base_data) > 0 else 0
+
+            winners = {}
+            for dim_idx, dim in enumerate(desired_dims):
+                dim_values = {k: v[dim_idx] for k, v in all_values.items()}
+                if dim_idx == len(desired_dims) - 1:
+                    dim_values['base'] = base_score
+                winner = max(dim_values, key=dim_values.get)
+                winners[dim_idx] = winner
+
+            for i, (method_key, method_name) in enumerate(model_dim_reduction_methods.items()):
+                values = all_values[method_key]
+                offset = (i - len(dim_reduction_methods) / 2 + 0.5) * bar_width
+                bars = ax.bar([x + offset for x in x_positions], values, bar_width,
+                              label=method_name, color=colors[method_key], alpha=0.8)
+
+                for dim_idx, bar in enumerate(bars):
+                    if winners[dim_idx] == method_key:
+                        bar.set_edgecolor('black')
+                        bar.set_linewidth(2)
+
+            last_pos = x_positions[-1]
+            backbone_bar = ax.bar(last_pos, base_score, bar_width,
+                                  label='Backbone (original)', color='gray', alpha=0.8,
+                                  edgecolor='black', linewidth=2)
+
+            ax.axhline(y=base_score, xmin=0, xmax=(last_pos + 0.5) / len(desired_dims),
+                       color='gray', linestyle='--', linewidth=1.5)
+
             ax.set_xlabel('Embedding Dimension', fontsize=12)
             ax.set_ylabel('Score', fontsize=12)
-            ax.grid(True, alpha=0.3)
-            ax.legend(fontsize=10, loc='best')
+            ax.set_xticks(x_positions)
+            ax.set_xticklabels([str(d) for d in desired_dims])
             
-            # Set x-axis ticks to actual dimensions
-            ax.set_xticks(all_dimensions)
-            ax.set_xticklabels([int(d) for d in all_dimensions])
-            # Stretch x-axis while preserving linear ratios between dimensions
-            ax.set_xlim(all_dimensions[0], all_dimensions[-1])
-            ax.margins(x=0)
+            legend_handles = [Patch(color=colors[k], label=v) for k, v in model_dim_reduction_methods.items()]
+            legend_handles.append(Patch(color='gray', label='Backbone (original)'))
+            ax.legend(handles=legend_handles, fontsize=10, loc='best')
             
-            # Set y-axis limits with padding
-            if task_values:
-                y_min, y_max = min(task_values), max(task_values)
-                padding = (y_max - y_min) * 0.1
-                ax.set_ylim([max(0, y_min - padding), min(1, y_max + padding)])
-            
+            ax.grid(True, alpha=0.3, axis='y')
+            ax.set_ylim(0, 1)
+
             plt.tight_layout()
-            
+
             safe_model_name = model_base_name.replace('/', '_')
-            output_path = os.path.join(output_dir, f'{safe_model_name}_{task_name.lower()}_comparison.png')
+            output_path = os.path.join(output_dir, 
+                f'{safe_model_name}_{task_name.lower()}_grouped_bar.jpg')
             plt.savefig(output_path, dpi=300, bbox_inches='tight')
-            print(f"Saved {task_name} comparison plot for {model_short}: {output_path}")
+            print(f"Saved grouped bar plot: {output_path}")
             plt.close()
+
 
 if __name__ == "__main__":
     print("Creating performance plots")
@@ -213,35 +183,30 @@ if __name__ == "__main__":
 
     df = pd.read_csv(RESULTS_PATH)
 
-    # Define the models to analyze
-    models = [
-        "Alibaba-NLP/gte-multilingual-base",
-        "jinaai/jina-embeddings-v2-small-en"
-    ]
+    models_to_mlr = {
+        "Alibaba-NLP/gte-multilingual-base": True,
+        "jinaai/jina-embeddings-v2-small-en": False,
+        "sentence-transformers/all-mpnet-base-v2": False
+    }
 
-    # Define task columns
     task_columns = {
-        'Overall': '**AVG_OVERALL**',
+        'AVG MTEB': '**AVG_MTEB**',
         'STS': '**AVG_STS**',
         'Retrieval': '**AVG_RETRIEVAL**',
         'Classification': '**AVG_CLASSIFICATION**',
         'Clustering': '**AVG_CLUSTERING**'
     }
 
-    # Define distillation methods and their display names
-    distillation_methods = {
-        'custom': 'Distillation (Ours)',
+    dim_reduction_methods = {
+        'custom': 'ALDRL (Ours)',
         'pca': 'PCA',
         'random_projection': 'Random Projection',
         'random_selection': 'Random Selection',
-        'truncation': 'Truncation'
+        'truncation': 'Truncation (Matryoshka)',
+        'autoencoder': 'Autoencoder'
     }
     
-    # Create individual plots for each model
-    for model in models:
-        plot_model_performance(model, df, PLOTS_PATH, task_columns)
+    # Create grouped bar chart plots
+    create_grouped_bar_plots(df, PLOTS_PATH, task_columns, models_to_mlr)
     
-    # Create method comparison plots for each task
-    create_method_comparison_plots(df, PLOTS_PATH, task_columns, models)
-    
-    print("All plots created successfully!")
+    print("All plots created successfully")

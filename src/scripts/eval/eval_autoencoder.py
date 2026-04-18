@@ -38,9 +38,14 @@ if __name__ == "__main__":
     parser.add_argument("--classification_batch_size", type=int, default=20, help="Batch size for classification evaluation")
     parser.add_argument("--clustering_batch_size", type=int, default=16, help="Batch size for clustering evaluation")
     parser.add_argument("--spearman_test_batch_size", type=int, default=20000, help="Batch size for intrinsic Spearman evaluation")
+    parser.add_argument("--backbone_dtype", type=str, default=None, help="dtype for backbone model (e.g., float16, bfloat16)")
 
     args = parser.parse_args()
     logger.info(f"Args: {args}")
+
+    dtype = None
+    if args.backbone_dtype:
+        dtype = getattr(torch, args.backbone_dtype)
 
     autoencoder = Autoencoder(
         input_dim=args.backbone_model_output_dim,
@@ -90,6 +95,7 @@ if __name__ == "__main__":
         projection=autoencoder.encoder,
         output_dim=args.target_dim,
         custom_model_name=model_name,
+        dtype=dtype,
     )
     custom_model.eval()
 

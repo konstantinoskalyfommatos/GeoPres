@@ -33,10 +33,17 @@ if __name__ == "__main__":
     parser.add_argument("--clustering_batch_size", type=int, default=16, help="Batch size for clustering evaluation")
 
     parser.add_argument("--overwrite_cache", action="store_true", help="Overwrite MTEB evaluation cache results")
+    parser.add_argument("--backbone_dtype", type=str, default=None, help="dtype for backbone model (e.g., float16, bfloat16)")
 
     args = parser.parse_args()
 
+    dtype = None
+    if args.backbone_dtype:
+        dtype = getattr(torch, args.backbone_dtype)
+
     model = SentenceTransformer(args.backbone_model, device="cuda", trust_remote_code=True)
+    if dtype is not None:
+        model = model.to(dtype=dtype)
     model.eval()
 
     # Evaluate the model

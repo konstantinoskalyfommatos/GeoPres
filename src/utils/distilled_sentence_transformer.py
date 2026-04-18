@@ -42,6 +42,7 @@ class DistilledSentenceTransformer(SentenceTransformer):
         device: str = "cuda",
         custom_model_name: str | None = None,
         max_seq_length: int = 512,
+        dtype: torch.dtype | None = None,
         **kwargs
     ):
         base_model = SentenceTransformer(
@@ -51,6 +52,9 @@ class DistilledSentenceTransformer(SentenceTransformer):
             **kwargs
         )
         base_model.max_sequence_length = max_seq_length
+
+        if dtype is not None:
+            base_model = base_model.to(dtype=dtype)
         
         projection_head = ProjectionHead(
             projection, 

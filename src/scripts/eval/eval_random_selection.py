@@ -37,9 +37,14 @@ if __name__ == "__main__":
     parser.add_argument("--spearman_test_batch_size", type=int, default=20000, help="Batch size for intrinsic Spearman evaluation")
 
     parser.add_argument("--intrinsic_only", action="store_true", help="Evaluate only on the intrinsic test set")
+    parser.add_argument("--backbone_dtype", type=str, default=None, help="dtype for backbone model (e.g., float16, bfloat16)")
 
     args = parser.parse_args()
     logger.info(f"Args: {args}")
+    
+    dtype = None
+    if args.backbone_dtype:
+        dtype = getattr(torch, args.backbone_dtype)
     
     # Randomly select 32 distinct indices
     indices = torch.randperm(args.backbone_model_output_dim)[:args.target_dim]
@@ -85,7 +90,8 @@ if __name__ == "__main__":
         model_name_or_path=args.backbone_model,
         projection=projection_head,
         output_dim=args.target_dim,
-        custom_model_name=model_name
+        custom_model_name=model_name,
+        dtype=dtype,
     )
 
     evaluate_mteb(

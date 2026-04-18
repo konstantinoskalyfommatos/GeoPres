@@ -44,9 +44,14 @@ if __name__ == "__main__":
     parser.add_argument("--spearman", action="store_true", help="Differentiable Spearman correlation loss")
     parser.add_argument("--pearson", action="store_true", help="Differentiable Pearson correlation loss")
     parser.add_argument("--spearman_local_or_global", type=str, default="local", choices=["local", "global"], help="Whether to compute Spearman loss using local (only pairs in the same batch) or global (all pairs in the dataset) similarities")
+    parser.add_argument("--backbone_dtype", type=str, default=None, help="dtype for backbone model (e.g., float16, bfloat16)")
 
     args = parser.parse_args()
     logger.info(f"Args: {args}")
+
+    dtype = None
+    if args.backbone_dtype:
+        dtype = getattr(torch, args.backbone_dtype)
 
     projection_head = nn.Sequential(
         nn.Linear(args.backbone_model_output_dim, args.target_dim),
@@ -116,6 +121,7 @@ if __name__ == "__main__":
         projection=projection_head,
         output_dim=args.target_dim,
         custom_model_name=model_name,
+        dtype=dtype,
     )
     custom_model.eval()
 

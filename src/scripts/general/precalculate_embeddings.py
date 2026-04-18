@@ -67,7 +67,8 @@ def precalculate_train_embeddings(
     text_column: str,
     dataset_name: str = None,
     max_examples: int = 2500000,
-    encode_every: int = 1000000
+    encode_every: int = 1000000,
+    dtype: torch.dtype | None = None,
 ):
     """Precalculate embeddings for a dataset using a specified model.
 
@@ -87,6 +88,9 @@ def precalculate_train_embeddings(
         trust_remote_code=True,
         device="cuda"
     )
+
+    if dtype is not None:
+        model = model.to(dtype=dtype)
 
     model.max_seq_length = 300
 
@@ -176,7 +180,8 @@ def precalculate_val_test_embeddings(
     dataset_path: str,
     batch_size: int,
     max_validation_examples: int = 10000,
-    max_test_examples: int = 10000
+    max_test_examples: int = 10000,
+    dtype: torch.dtype | None = None,
 ):
     """Precalculate embeddings for a dataset using a specified model.
 
@@ -195,6 +200,9 @@ def precalculate_val_test_embeddings(
         trust_remote_code=True,
         device="cuda"
     )
+
+    if dtype is not None:
+        model = model.to(dtype=dtype)
 
     model.max_seq_length = 512
 
@@ -243,6 +251,7 @@ if __name__ == "__main__":
     parser = ArgumentParser(description="Precalculate embeddings for a dataset")
     
     parser.add_argument("--model_name", type=str, default="jinaai/jina-embeddings-v2-small-en")
+    parser.add_argument("--backbone_dtype", type=str, default=None, help="dtype for backbone model (e.g., float16, bfloat16)")
     parser.add_argument("--train", action="store_true", help="Precalulate training embeddings")
     parser.add_argument("--val_test", action="store_true", help="Precalulate validation and test embeddings")
     parser.add_argument("--batch_size", type=int, default=8192, help="1024 works well for 24GB GPU memory and Alibaba-NLP/gte-multilingual-base")
@@ -252,6 +261,10 @@ if __name__ == "__main__":
     parser.add_argument("--encode_every", type=int, default=100000, help="Number of examples to encode before saving intermediate results")
 
     args = parser.parse_args()
+
+    dtype = None
+    if args.backbone_dtype:
+        dtype = getattr(torch, args.backbone_dtype)
 
     if not args.train and not args.val_test:
         raise ValueError("Provide at least one of --train or --val_test arguments.")
@@ -264,7 +277,8 @@ if __name__ == "__main__":
             batch_size=args.batch_size,
             text_column="text",
             max_examples=args.max_train_examples,
-            encode_every=args.encode_every
+            encode_every=args.encode_every,
+            dtype=dtype,
         )
     if args.val_test:
         precalculate_val_test_embeddings(
@@ -272,5 +286,6 @@ if __name__ == "__main__":
             dataset_path="agentlans/sentence-paraphrases",
             batch_size=args.batch_size,
             max_validation_examples=args.max_val_examples,
-            max_test_examples=args.max_test_examples
+            max_test_examples=args.max_test_examples,
+            dtype=dtype,
         )

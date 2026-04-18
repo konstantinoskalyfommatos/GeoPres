@@ -60,6 +60,7 @@ def train_model(
     classification_batch_size: int = 20,
     clustering_batch_size: int = 16,
     overwrite_cache: bool = False,
+    dtype: torch.dtype | None = None,
 ) -> None:
     before = time.perf_counter()
 
@@ -159,6 +160,7 @@ def train_model(
         projection=trainable_projection,
         output_dim=target_dim,
         custom_model_name=custom_model_name,
+        dtype=dtype,
     )
     sentence_transformer.eval()
 
@@ -226,11 +228,18 @@ def main():
     parser.add_argument("--classification_batch_size", type=int, default=20, help="Batch size for classification evaluation")
     parser.add_argument("--clustering_batch_size", type=int, default=16, help="Batch size for clustering evaluation")
 
+    # Quantization
+    parser.add_argument("--backbone_dtype", type=str, default=None, help="dtype for backbone model (e.g., float16, bfloat16)")
+
     # Output configuration
     parser.add_argument("--custom_suffix", type=str, default=None, help="Will be added to the normal model name")
     parser.add_argument("--resume_from_checkpoint", action="store_true", help="Whether to resume training from the last checkpoint in the output directory")
 
     args = parser.parse_args()
+        
+    dtype = None
+    if args.backbone_dtype:
+        dtype = getattr(torch, args.backbone_dtype)
         
     if args.spearman:
         model_name = (
@@ -329,6 +338,7 @@ def main():
         classification_batch_size=args.classification_batch_size,
         clustering_batch_size=args.clustering_batch_size,
         overwrite_cache=args.overwrite_cache,
+        dtype=dtype,
     )
 
 

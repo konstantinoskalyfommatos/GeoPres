@@ -5,13 +5,8 @@ import os
 from utils.config import EVALUATION_RESULTS_PATH, PROJECT_ROOT
 
 
-def get_desired_dimensions(model_base_name):
-    """Return the list of desired dimensions for grouping."""
-    if 'gte-multilingual' in model_base_name or "all-mpnet-base-v2" in model_base_name:
-        return [32, 64, 128, 256, 768]
-    elif 'jina-embeddings-v2-small-en' in model_base_name:
-        return [32, 64, 128, 256, 512]
-    raise ValueError(f"Unknown model base name: {model_base_name}")
+def get_desired_dimensions():
+    return [32, 64, 128, 256]
 
 
 def extract_embedding_dim(model_name):
@@ -25,6 +20,8 @@ def extract_embedding_dim(model_name):
         return 768
     elif 'jina-embeddings-v2-small-en' in model_name:
         return 512
+    elif 'Qwen3-Embedding-0.6B' in model_name:
+        return 1024
     raise ValueError(f"Unknown model name format: {model_name}")
 
 
@@ -84,7 +81,7 @@ def create_grouped_bar_plots(
             'truncation': truncation_label,
             'autoencoder': 'Autoencoder'
         }
-        desired_dims = get_desired_dimensions(model_base_name)
+        desired_dims = get_desired_dimensions()
         model_data = df[df['Model'].str.contains(model_base_name.replace('/', '__'))]
         model_data = model_data.copy()
         model_data['dimension'] = model_data['Model'].apply(extract_embedding_dim)
@@ -103,11 +100,19 @@ def create_grouped_bar_plots(
 
         for task_name, column_name in task_columns.items():
             fig, ax = plt.subplots(figsize=(14, 8))
-            fig.suptitle(f'{task_name} by Dimension: {model_base_name}', 
-                         fontsize=16, fontweight='bold')
+            
+            # Get original dimension from base model data
+            base_data = model_data[model_data['method'] == 'base']
+            original_dim = base_data['dimension'].values[0] if len(base_data) > 0 else 'N/A'
+            
+            fig.suptitle(f'{task_name} by Dimension: {model_base_name} (Original: {original_dim}D)', 
+                          fontsize=16, fontweight='bold')
 
             bar_width = 0.12
             x_positions = range(len(desired_dims))
+
+            base_data = model_data[model_data['method'] == 'base']
+            base_score = base_data[column_name].values[0] if len(base_data) > 0 else 1
 
             all_values = {}
             for method_key, method_name in model_dim_reduction_methods.items():
@@ -116,21 +121,18 @@ def create_grouped_bar_plots(
                 for dim in desired_dims:
                     dim_data = method_data[method_data['grouped_dim'] == dim]
                     if len(dim_data) > 0:
-                        values.append(dim_data[column_name].values[0])
+                        values.append(dim_data[column_name].values[0] / base_score)
                     else:
                         values.append(0)
                 all_values[method_key] = values
 
-            base_data = model_data[model_data['method'] == 'base']
-            base_score = base_data[column_name].values[0] if len(base_data) > 0 else 0
-
             winners = {}
             for dim_idx, dim in enumerate(desired_dims):
                 dim_values = {k: v[dim_idx] for k, v in all_values.items()}
-                if dim_idx == len(desired_dims) - 1:
-                    dim_values['base'] = base_score
                 winner = max(dim_values, key=dim_values.get)
                 winners[dim_idx] = winner
+
+            last_pos = x_positions[-1]
 
             for i, (method_key, method_name) in enumerate(model_dim_reduction_methods.items()):
                 values = all_values[method_key]
@@ -143,31 +145,26 @@ def create_grouped_bar_plots(
                         bar.set_edgecolor('black')
                         bar.set_linewidth(2)
 
-            last_pos = x_positions[-1]
-            backbone_bar = ax.bar(last_pos, base_score, bar_width,
-                                  label='Backbone (original)', color='gray', alpha=0.8,
-                                  edgecolor='black', linewidth=2)
-
-            ax.axhline(y=base_score, xmin=0, xmax=(last_pos + 0.5) / len(desired_dims),
+            ax.axhline(y=1.0, xmin=0, xmax=1.0,
                        color='gray', linestyle='--', linewidth=1.5)
 
             ax.set_xlabel('Embedding Dimension', fontsize=12)
-            ax.set_ylabel('Score', fontsize=12)
+            ax.set_ylabel('Normalized Score (relative to original)', fontsize=12)
             ax.set_xticks(x_positions)
             ax.set_xticklabels([str(d) for d in desired_dims])
             
             legend_handles = [Patch(color=colors[k], label=v) for k, v in model_dim_reduction_methods.items()]
-            legend_handles.append(Patch(color='gray', label='Backbone (original)'))
             ax.legend(handles=legend_handles, fontsize=10, loc='best')
             
             ax.grid(True, alpha=0.3, axis='y')
-            ax.set_ylim(0, 1)
+            ax.set_ylim(0, 1.1)
+            ax.set_yticks([0, 0.2, 0.4, 0.6, 0.8, 1.0])
 
             plt.tight_layout()
 
             safe_model_name = model_base_name.replace('/', '_')
             output_path = os.path.join(output_dir, 
-                f'{safe_model_name}_{task_name.lower()}_grouped_bar.jpg')
+                f'{safe_model_name}_{task_name.lower()}_grouped_bar.png')
             plt.savefig(output_path, dpi=300, bbox_inches='tight')
             print(f"Saved grouped bar plot: {output_path}")
             plt.close()
@@ -177,7 +174,7 @@ if __name__ == "__main__":
     print("Creating performance plots")
 
     RESULTS_PATH = os.path.join(EVALUATION_RESULTS_PATH, "comparison_results.csv")
-    PLOTS_PATH = os.path.join(PROJECT_ROOT, "storage/plots")
+    PLOTS_PATH = os.path.join(PROJECT_ROOT, "storage/plots/main_method")
 
     os.makedirs(PLOTS_PATH, exist_ok=True)
 
@@ -186,7 +183,8 @@ if __name__ == "__main__":
     models_to_mlr = {
         "Alibaba-NLP/gte-multilingual-base": True,
         "jinaai/jina-embeddings-v2-small-en": False,
-        "sentence-transformers/all-mpnet-base-v2": False
+        "Qwen/Qwen3-Embedding-0.6B": True,
+        "sentence-transformers/all-mpnet-base-v2": False,
     }
 
     task_columns = {

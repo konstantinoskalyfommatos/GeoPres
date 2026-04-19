@@ -20,7 +20,7 @@ from transformers import TrainingArguments, EarlyStoppingCallback
 from utils.distilled_sentence_transformer import DistilledSentenceTransformer
 from utils.train import SimilarityTrainer, collate_embeddings
 from utils.custom_datasets import get_precalculated_embeddings_dataset
-from utils.config import TRAINED_MODELS_PATH, EVALUATION_RESULTS_PATH
+from utils.config import TRAINED_MODELS_PATH, EVALUATION_RESULTS_PATH, parse_dtype
 from utils.eval import evaluate_mteb, eval_intrinsic, find_checkpoint_lowest_val_loss
 
 
@@ -239,7 +239,7 @@ def main():
         
     dtype = None
     if args.backbone_dtype:
-        dtype = getattr(torch, args.backbone_dtype)
+        dtype = parse_dtype(args.backbone_dtype)
         
     if args.spearman:
         model_name = (

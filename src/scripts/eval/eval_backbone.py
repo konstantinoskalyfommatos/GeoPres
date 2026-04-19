@@ -3,7 +3,7 @@ from argparse import ArgumentParser
 import torch
 import logging
 import os
-from utils.config import EVALUATION_RESULTS_PATH
+from utils.config import EVALUATION_RESULTS_PATH, parse_dtype
 
 from utils.eval import evaluate_mteb
 
@@ -39,7 +39,7 @@ if __name__ == "__main__":
 
     dtype = None
     if args.backbone_dtype:
-        dtype = getattr(torch, args.backbone_dtype)
+        dtype = parse_dtype(args.backbone_dtype)
 
     model = SentenceTransformer(args.backbone_model, device="cuda", trust_remote_code=True)
     if dtype is not None:

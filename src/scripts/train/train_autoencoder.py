@@ -21,7 +21,7 @@ from torch.utils.data import Dataset, DataLoader
 from transformers import Trainer, TrainingArguments, EarlyStoppingCallback
 
 from utils.custom_datasets import get_precalculated_embeddings_dataset
-from utils.config import TRAINED_AUTOENCODERS_PATH, EVALUATION_RESULTS_PATH
+from utils.config import TRAINED_AUTOENCODERS_PATH, EVALUATION_RESULTS_PATH, parse_dtype
 from utils.distilled_sentence_transformer import DistilledSentenceTransformer
 from utils.eval import evaluate_mteb, eval_intrinsic
 
@@ -293,7 +293,7 @@ def main():
 
     dtype = None
     if args.backbone_dtype:
-        dtype = getattr(torch, args.backbone_dtype)
+        dtype = parse_dtype(args.backbone_dtype)
 
     model_name = (
         f"{args.backbone_model}"

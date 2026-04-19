@@ -5,7 +5,7 @@ import os
 import logging
 import sys
 
-from utils.config import EVALUATION_RESULTS_PATH
+from utils.config import EVALUATION_RESULTS_PATH, parse_dtype
 from utils.distilled_sentence_transformer import DistilledSentenceTransformer
 from utils.eval import eval_intrinsic, evaluate_mteb
 
@@ -44,7 +44,7 @@ if __name__ == "__main__":
     
     dtype = None
     if args.backbone_dtype:
-        dtype = getattr(torch, args.backbone_dtype)
+        dtype = parse_dtype(args.backbone_dtype)
     
     # Select first args.target_dim indices
     indices = torch.arange(args.target_dim)

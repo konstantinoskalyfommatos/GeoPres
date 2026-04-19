@@ -5,7 +5,7 @@ import os
 import logging
 import json
 
-from utils.config import TRAINED_MODELS_PATH, EVALUATION_RESULTS_PATH
+from utils.config import TRAINED_MODELS_PATH, EVALUATION_RESULTS_PATH, parse_dtype
 from utils.distilled_sentence_transformer import DistilledSentenceTransformer
 from utils.eval import evaluate_mteb, eval_intrinsic, find_checkpoint_lowest_val_loss
 
@@ -51,7 +51,7 @@ if __name__ == "__main__":
 
     dtype = None
     if args.backbone_dtype:
-        dtype = getattr(torch, args.backbone_dtype)
+        dtype = parse_dtype(args.backbone_dtype)
 
     projection_head = nn.Sequential(
         nn.Linear(args.backbone_model_output_dim, args.target_dim),

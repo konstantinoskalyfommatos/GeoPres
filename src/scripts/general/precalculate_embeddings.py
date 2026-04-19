@@ -12,7 +12,7 @@ from tqdm import tqdm
 import logging
 
 from torch.utils.data import DataLoader, Dataset
-from utils.config import PROJECT_ROOT
+from utils.config import PROJECT_ROOT, parse_dtype
 
 
 os.environ["HF_HUB_DOWNLOAD_TIMEOUT"] = "300"  # 5 minutes
@@ -264,7 +264,7 @@ if __name__ == "__main__":
 
     dtype = None
     if args.backbone_dtype:
-        dtype = getattr(torch, args.backbone_dtype)
+        dtype = parse_dtype(args.backbone_dtype)
 
     if not args.train and not args.val_test:
         raise ValueError("Provide at least one of --train or --val_test arguments.")

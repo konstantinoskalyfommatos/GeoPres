@@ -4,7 +4,7 @@ import torch.nn as nn
 import os
 import logging
 
-from utils.config import TRAINED_AUTOENCODERS_PATH, EVALUATION_RESULTS_PATH
+from utils.config import TRAINED_AUTOENCODERS_PATH, EVALUATION_RESULTS_PATH, parse_dtype
 from utils.distilled_sentence_transformer import DistilledSentenceTransformer
 from utils.eval import evaluate_mteb, eval_intrinsic
 from scripts.train.train_autoencoder import Autoencoder
@@ -45,7 +45,7 @@ if __name__ == "__main__":
 
     dtype = None
     if args.backbone_dtype:
-        dtype = getattr(torch, args.backbone_dtype)
+        dtype = parse_dtype(args.backbone_dtype)
 
     autoencoder = Autoencoder(
         input_dim=args.backbone_model_output_dim,

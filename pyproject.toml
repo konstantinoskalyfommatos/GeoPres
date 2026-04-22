@@ -1,0 +1,37 @@
+[project]
+name = "thesis-project"
+version = "0.1.0"
+description = "Thesis project - embedding distillation and intrinsic dimension analysis"
+requires-python = ">=3.10"
+dependencies = [
+    "accelerate",
+    "datasets",
+    "flash-attn",
+    "matplotlib",
+    "mteb",
+    "numpy",
+    "optuna",
+    "pandas",
+    "python-dotenv",
+    "pyyaml",
+    "safetensors",
+    "scikit-learn",
+    "scipy",
+    "sentence-transformers",
+    "torch",
+    "torchsort",
+    "tqdm",
+    "transformers",
+    "umap-learn",
+]
+
+[project.scripts]
+train-model = "scripts.train.train_model:main"
+train-autoencoder = "scripts.train.train_autoencoder:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv]
+dev-dependencies = []

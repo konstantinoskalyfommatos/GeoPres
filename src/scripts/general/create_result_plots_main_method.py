@@ -62,24 +62,24 @@ def create_grouped_bar_plots(
 ):
     """Create grouped bar charts for each task, grouped by dimensions."""
     colors = {
-        'custom': '#1f77b4',      # Blue (Tableau)
-        'pca': '#d62728',         # Red (Tableau)
-        'random_projection': '#2ca02c',  # Green (Tableau)
-        'random_selection': '#ff7f0e',   # Orange (Tableau)
-        'truncation': '#9467bd',   # Purple (Tableau)
-        'base': '#17becf',        # Cyan (Tableau)
-        'autoencoder': '#bcbd22'   # Olive (Tableau)
+        'custom': '#3b82f6',             # Blue
+        'pca': '#d1d5db',                # Light Gray
+        'random_projection': '#9ca3af',  # Gray
+        'random_selection': '#6b7280',   # Dark Gray
+        'truncation': '#4b5563',         # Darker Gray
+        'base': '#1f2937',               # Almost Black
+        'autoencoder': '#e5e7eb'         # Very Light Gray
     }
 
     for model_base_name, include_in_mlr in models.items():
         truncation_label = 'Truncation (Matryoshka)' if include_in_mlr else 'Truncation'
         model_dim_reduction_methods = {
             'custom': 'ALDRL (Ours)',
-            'pca': 'PCA',
-            'random_projection': 'Random Projection',
             'random_selection': 'Random Selection',
-            'truncation': truncation_label,
-            'autoencoder': 'Autoencoder'
+            'random_projection': 'Random Projection',
+            'autoencoder': 'Autoencoder',
+            'pca': 'PCA',
+            'truncation': truncation_label
         }
         desired_dims = get_desired_dimensions()
         model_data = df[df['Model'].str.contains(model_base_name.replace('/', '__'))]
@@ -99,14 +99,14 @@ def create_grouped_bar_plots(
             continue
 
         for task_name, column_name in task_columns.items():
-            fig, ax = plt.subplots(figsize=(14, 8))
+            fig, ax = plt.subplots(figsize=(20, 14))
             
             # Get original dimension from base model data
             base_data = model_data[model_data['method'] == 'base']
             original_dim = base_data['dimension'].values[0] if len(base_data) > 0 else 'N/A'
             
             fig.suptitle(f'{task_name} by Dimension: {model_base_name} (Original: {original_dim}D)', 
-                          fontsize=16, fontweight='bold')
+                          fontsize=26, fontweight='bold')
 
             bar_width = 0.12
             x_positions = range(len(desired_dims))
@@ -134,27 +134,54 @@ def create_grouped_bar_plots(
 
             last_pos = x_positions[-1]
 
+            hatches = {
+                'custom': '///',
+                'pca': '',
+                'random_projection': '',
+                'random_selection': '',
+                'truncation': '',
+                'base': '',
+                'autoencoder': ''
+            }
+
             for i, (method_key, method_name) in enumerate(model_dim_reduction_methods.items()):
                 values = all_values[method_key]
                 offset = (i - len(dim_reduction_methods) / 2 + 0.5) * bar_width
+                
+                # Apply hatch and edgecolor white for custom method
+                edgecolor = 'white' if method_key == 'custom' else None
+                linewidth = 1 if method_key == 'custom' else 0
+
                 bars = ax.bar([x + offset for x in x_positions], values, bar_width,
-                              label=method_name, color=colors[method_key], alpha=0.8)
+                              label=method_name, facecolor=colors[method_key], 
+                              edgecolor=edgecolor, linewidth=linewidth,
+                              hatch=hatches.get(method_key, ''), alpha=0.9 if method_key == 'custom' else 0.8)
 
                 for dim_idx, bar in enumerate(bars):
-                    if winners[dim_idx] == method_key:
+                    is_winner = winners[dim_idx] == method_key
+                    if is_winner:
                         bar.set_edgecolor('black')
                         bar.set_linewidth(2)
+                    
+                    height = bar.get_height()
+                    if height > 0:
+                        ax.text(bar.get_x() + bar.get_width() / 2., height + 0.01,
+                                f'{height:.2f}', ha='center', va='bottom', fontsize=12,
+                                fontweight='bold' if is_winner else 'normal')
 
             ax.axhline(y=1.0, xmin=0, xmax=1.0,
                        color='gray', linestyle='--', linewidth=1.5)
 
-            ax.set_xlabel('Embedding Dimension', fontsize=12)
-            ax.set_ylabel('Normalized Score (relative to original)', fontsize=12)
+            ax.set_xlabel('Embedding Dimension', fontsize=22)
+            ax.set_ylabel('Normalized Score (relative to original)', fontsize=22)
             ax.set_xticks(x_positions)
-            ax.set_xticklabels([str(d) for d in desired_dims])
+            ax.set_xticklabels([str(d) for d in desired_dims], fontsize=18)
             
-            legend_handles = [Patch(color=colors[k], label=v) for k, v in model_dim_reduction_methods.items()]
-            ax.legend(handles=legend_handles, fontsize=10, loc='best')
+            legend_handles = []
+            for k, v in model_dim_reduction_methods.items():
+                legend_handles.append(Patch(facecolor=colors[k], label=v, hatch=hatches.get(k, ''), 
+                                            edgecolor='white' if hatches.get(k, '') else None, linewidth=1 if hatches.get(k, '') else 0))
+            ax.legend(handles=legend_handles, fontsize=18, loc='best')
             
             ax.grid(True, alpha=0.3, axis='y')
             ax.set_ylim(0, 1.1)
@@ -197,11 +224,11 @@ if __name__ == "__main__":
 
     dim_reduction_methods = {
         'custom': 'ALDRL (Ours)',
-        'pca': 'PCA',
-        'random_projection': 'Random Projection',
+        'autoencoder': 'Autoencoder',
         'random_selection': 'Random Selection',
-        'truncation': 'Truncation (Matryoshka)',
-        'autoencoder': 'Autoencoder'
+        'random_projection': 'Random Projection',
+        'pca': 'PCA',
+        'truncation': 'Truncation (Matryoshka)'
     }
     
     # Create grouped bar chart plots

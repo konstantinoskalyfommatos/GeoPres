@@ -7,8 +7,15 @@ from utils.config import EVALUATION_RESULTS_PATH
 
 
 def calculate_intrinsic_correlations(df: pd.DataFrame) -> dict:
-    # Drop "Alibaba-NLP__gte-multilingual-base" and "jinaai__jina-embeddings-v2-small-en" rows
-    df = df[~df["Model"].isin(["Alibaba-NLP__gte-multilingual-base", "jinaai__jina-embeddings-v2-small-en", "sentence-transformers__all-mpnet-base-v2"])]
+    df = df[~df["Model"].isin(
+    [
+        "Alibaba-NLP__gte-multilingual-base", 
+        "jinaai__jina-embeddings-v2-small-en", 
+        "sentence-transformers__all-mpnet-base-v2",
+        "Qwen__Qwen3-Embedding-0.6B"
+        
+        ]
+    )]
 
     # Keep only the mteb and intrinsic metric columns, in order to calculate the correlations
     df_mteb_angular_loss = df[["**AVG_MTEB**", "angular_loss"]].dropna()
@@ -112,6 +119,10 @@ if __name__ == "__main__":
     df = pd.read_csv(os.path.join(EVALUATION_RESULTS_PATH, "comparison_results.csv"))
     correlations = calculate_intrinsic_correlations(df)
 
-    with open(os.path.join(EVALUATION_RESULTS_PATH, "intrinsic_correlations.json"), "w") as f:
+
+    OUTPUT_PATH = os.path.join(EVALUATION_RESULTS_PATH, "intrinsic_correlations.json")
+    with open(OUTPUT_PATH, "w") as f:
         json.dump(correlations, f, indent=4)
+
+    print(f"Intrinsic extrinsic correlations saved at: {OUTPUT_PATH}")
         

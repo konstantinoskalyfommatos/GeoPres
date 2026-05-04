@@ -175,7 +175,11 @@ def create_grouped_bar_plots(
             ax.set_xlabel('Embedding Dimension', fontsize=22)
             ax.set_ylabel('Normalized Score (relative to original)', fontsize=22)
             ax.set_xticks(x_positions)
-            ax.set_xticklabels([str(d) for d in desired_dims], fontsize=18)
+            if original_dim != 'N/A' and original_dim > 0:
+                x_labels = [f'{d} ({int(d/original_dim*100)}%)' for d in desired_dims]
+            else:
+                x_labels = [str(d) for d in desired_dims]
+            ax.set_xticklabels(x_labels, fontsize=18)
             
             legend_handles = []
             for k, v in model_dim_reduction_methods.items():

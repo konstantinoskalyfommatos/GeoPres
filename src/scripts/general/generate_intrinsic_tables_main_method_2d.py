@@ -20,14 +20,14 @@ backbone_display = {
     'sentence-transformers__all-mpnet-base-v2': 'All-MPNet-Base-V2'
 }
 
-dimensions = [32, 64, 128, 256]
+dimensions = [2]
 
 baselines = {
     'PCA': 'pca',
     'Random Projection': 'random_projection',
     'Random Selection': 'random_selection',
-    'Truncation': 'truncation',
     'Autoencoder': 'autoencoder',
+    'Truncation': 'truncation',
     'ALDRL (Ours)': 'batch_20000_poslossfactor_1'
 }
 
@@ -68,9 +68,6 @@ for backbone in backbones:
                 first_in_dim = False
             
             print(f"{method_name} & " + ' & '.join(vals) + ' \\\\')
-        
-        if dim != dimensions[-1]:
-            print("\\midrule")
     
     print("\\bottomrule")
     print("\\end{longtable}")

@@ -3,36 +3,32 @@ import pandas as pd
 df = pd.read_csv('storage/evaluation_results/comparison_results.csv')
 df['Model'] = df['Model'].str.replace('/', '__', regex=False)
 
-intrinsic_cols = ['spearman_loss', 'spearman_loss_weighted', 'angular_loss',
-                  'angular_loss_weighted', 'positional_loss', 'positional_loss_weighted']
-
 extrinsic_cols = ['**AVG_MTEB**', '**AVG_STS**', '**AVG_RETRIEVAL**',
                   '**AVG_CLASSIFICATION**', '**AVG_CLUSTERING**']
 
 backbones = [
     'Alibaba-NLP__gte-multilingual-base',
-    'Qwen__Qwen3-Embedding-0.6B',
     'jinaai__jina-embeddings-v2-small-en',
+    'Qwen__Qwen3-Embedding-0.6B',
     'sentence-transformers__all-mpnet-base-v2'
 ]
 
 backbone_display = {
     'Alibaba-NLP__gte-multilingual-base': 'GTE-Multilingual-Base',
-    'Qwen__Qwen3-Embedding-0.6B': 'Qwen3-Embedding-0.6B',
     'jinaai__jina-embeddings-v2-small-en': 'Jina-Embeddings-V2-Small-En',
+    'Qwen__Qwen3-Embedding-0.6B': 'Qwen3-Embedding-0.6B',
     'sentence-transformers__all-mpnet-base-v2': 'All-MPNet-Base-V2'
 }
 
-dimensions = [32, 64, 128, 256]
+dimensions = [2]
 
 baselines = {
     'PCA': 'pca',
     'Random Projection': 'random_projection',
     'Random Selection': 'random_selection',
-    'Truncation': 'truncation',
     'Autoencoder': 'autoencoder',
-    'ALDRL (Unweighted)': 'batch_20000_poslossfactor_1',
-    'ALDRL (Weighted)': 'batch_20000_poslossfactor_1_weighted'
+    'Truncation': 'truncation',
+    'ALDRL (Ours)': 'batch_20000_poslossfactor_1'
 }
 
 def format_val(val):
@@ -41,57 +37,26 @@ def format_val(val):
     return f'{val:.4f}'
 
 print("\n" + "="*80)
-print("INTRINSIC TABLES")
+print("EXTRINSIC TABLES: Main Method 2D (Normalized by Backbone Score)")
 print("="*80 + "\n")
 
 for backbone in backbones:
-    print(f"\\subsubsection{{{backbone_display[backbone]}}}")
-    print("\\begin{landscape}")
-    print("\\begin{longtable}{lcccccc}")
-    print("\\toprule")
+    # Get base (full-dimensional) model scores for normalization
+    base_row = df[df['Model'] == backbone]
+    if len(base_row) == 0:
+        print(f"WARNING: Base model not found: {backbone}")
+        continue
+    base_data = base_row.iloc[0]
 
-    col_labels = ['Method', 'Spearman', 'Spearman (W)', 'Angular', 'Angular (W)', 'Positional', 'Positional (W)']
-    print(' & '.join(col_labels) + ' \\\\')
-    print('\\midrule')
-    print('\\midrule')
+    # Compute normalization factors
+    norm_factors = {}
+    for col in extrinsic_cols:
+        base_score = base_data[col]
+        if pd.isna(base_score) or base_score == 0:
+            norm_factors[col] = None
+        else:
+            norm_factors[col] = base_score
 
-    for dim in dimensions:
-        first_in_dim = True
-
-        for method_name, method_suffix in baselines.items():
-            model_name = f"{backbone}_distilled_{dim}_{method_suffix}"
-            row = df[df['Model'] == model_name]
-
-            if len(row) == 0:
-                print(f"WARNING: Model not found: {model_name}")
-                continue
-
-            row_data = row.iloc[0]
-            vals = []
-            for col in intrinsic_cols:
-                val = row_data[col]
-                vals.append(format_val(val))
-
-            if first_in_dim:
-                print(f"\\multicolumn{{7}}{{l}}{{\\textbf{{Dim = {dim}}}}} \\\\")
-                print("\\midrule")
-                first_in_dim = False
-
-            print(f"{method_name} & " + ' & '.join(vals) + ' \\\\')
-
-        if dim != dimensions[-1]:
-            print("\\midrule")
-
-    print("\\bottomrule")
-    print("\\end{longtable}")
-    print("\\end{landscape}")
-    print("\n")
-
-print("\n" + "="*80)
-print("EXTRINSIC TABLES")
-print("="*80 + "\n")
-
-for backbone in backbones:
     print(f"\\subsubsection{{{backbone_display[backbone]}}}")
     print("\\begin{landscape}")
     print("\\begin{longtable}{lccccc}")
@@ -117,7 +82,12 @@ for backbone in backbones:
             vals = []
             for col in extrinsic_cols:
                 val = row_data[col]
-                vals.append(format_val(val))
+                base_score = norm_factors[col]
+                if pd.isna(val) or base_score is None or base_score == 0:
+                    vals.append('-')
+                else:
+                    normalized = val / base_score
+                    vals.append(f'{normalized:.4f}')
 
             if first_in_dim:
                 print(f"\\multicolumn{{6}}{{l}}{{\\textbf{{Dim = {dim}}}}} \\\\")
@@ -125,9 +95,6 @@ for backbone in backbones:
                 first_in_dim = False
 
             print(f"{method_name} & " + ' & '.join(vals) + ' \\\\')
-
-        if dim != dimensions[-1]:
-            print("\\midrule")
 
     print("\\bottomrule")
     print("\\end{longtable}")

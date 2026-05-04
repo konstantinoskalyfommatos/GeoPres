@@ -1,5 +1,5 @@
 import pandas as pd
-from scipy.stats import spearmanr, pearsonr
+from scipy.stats import spearmanr
 import os
 import json
 
@@ -27,90 +27,66 @@ def calculate_intrinsic_correlations(df: pd.DataFrame) -> dict:
     df_mteb_spearman_loss = df[["**AVG_MTEB**", "spearman_loss"]].dropna()
     df_mteb_spearman_loss_weighted = df[["**AVG_MTEB**", "spearman_loss_weighted"]].dropna()
 
-    # Calculate Spearman and Pearson correlations for angular_loss
+    # Calculate Spearman correlation for angular_loss
     spearman_angular_score = spearmanr(
         df_mteb_angular_loss["**AVG_MTEB**"].values, 
         df_mteb_angular_loss["angular_loss"].values
     )
-    # pearson_angular_score = pearsonr(
-    #     df_mteb_angular_loss["**AVG_MTEB**"].values, 
-    #     df_mteb_angular_loss["angular_loss"].values
-    # )
 
-    # Calculate Spearman and Pearson correlations for angular_loss_weighted
+    # Calculate Spearman correlation for angular_loss_weighted
     spearman_angular_score_weighted = spearmanr(
         df_mteb_angular_loss_weighted["**AVG_MTEB**"].values, 
         df_mteb_angular_loss_weighted["angular_loss_weighted"].values
     )
-    # pearson_angular_score_weighted = pearsonr(
-    #     df_mteb_angular_loss_weighted["**AVG_MTEB**"].values, 
-    #     df_mteb_angular_loss_weighted["angular_loss_weighted"].values
-    # )
 
-    # Calculate Spearman and Pearson correlations for positional_loss
+    # Calculate Spearman correlation for positional_loss
     spearman_positional_score = spearmanr(
         df_mteb_positional_loss["**AVG_MTEB**"].values, 
         df_mteb_positional_loss["positional_loss"].values
     )
-    # pearson_positional_score = pearsonr(
-    #     df_mteb_positional_loss["**AVG_MTEB**"].values, 
-    #     df_mteb_positional_loss["positional_loss"].values
-    # )
 
-    # Calculate Spearman and Pearson correlations for positional_loss_weighted
+    # Calculate Spearman correlation for positional_loss_weighted
     spearman_positional_score_weighted = spearmanr(
         df_mteb_positional_loss_weighted["**AVG_MTEB**"].values, 
         df_mteb_positional_loss_weighted["positional_loss_weighted"].values
     )
-    # pearson_positional_score_weighted = pearsonr(
-    #     df_mteb_positional_loss_weighted["**AVG_MTEB**"].values, 
-    #     df_mteb_positional_loss_weighted["positional_loss_weighted"].values
-    # )
 
-    # Calculate Spearman and Pearson correlations for spearman_loss
+    # Calculate Spearman correlation for spearman_loss
     spearman_spearman_score = spearmanr(
         df_mteb_spearman_loss["**AVG_MTEB**"].values, 
         df_mteb_spearman_loss["spearman_loss"].values
     )
-    # pearson_spearman_score = pearsonr(
-    #     df_mteb_spearman_loss["**AVG_MTEB**"].values, 
-    #     df_mteb_spearman_loss["spearman_loss"].values
-    # )
 
-    # Calculate Spearman and Pearson correlations for spearman_loss_weighted
+    # Calculate Spearman correlation for spearman_loss_weighted
     spearman_spearman_score_weighted = spearmanr(
         df_mteb_spearman_loss_weighted["**AVG_MTEB**"].values, 
         df_mteb_spearman_loss_weighted["spearman_loss_weighted"].values
     )
-    # pearson_spearman_score_weighted = pearsonr(
-    #     df_mteb_spearman_loss_weighted["**AVG_MTEB**"].values, 
-    #     df_mteb_spearman_loss_weighted["spearman_loss_weighted"].values
-    # )
 
     return {
         "angular_loss": {
             "spearman": spearman_angular_score.statistic,
-            # "pearson": pearson_angular_score.statistic
+            "pvalue": spearman_angular_score.pvalue,
         },
         "angular_loss_weighted": {
             "spearman": spearman_angular_score_weighted.statistic,
-            # "pearson": pearson_angular_score_weighted.statistic
+            "pvalue": spearman_angular_score_weighted.pvalue,
         },
         "positional_loss": {
             "spearman": spearman_positional_score.statistic,
-            # "pearson": pearson_positional_score.statistic
+            "pvalue": spearman_positional_score.pvalue,
         },
         "positional_loss_weighted": {
             "spearman": spearman_positional_score_weighted.statistic,
-            # "pearson": pearson_positional_score_weighted.statistic
+            "pvalue": spearman_positional_score_weighted.pvalue,
         },
         "spearman_loss": {
             "spearman": spearman_spearman_score.statistic,
-            # "pearson": pearson_spearman_score.statistic
+            "pvalue": spearman_spearman_score.pvalue,
         },
         "spearman_loss_weighted": {
             "spearman": spearman_spearman_score_weighted.statistic,
-            # "pearson": pearson_spearman_score_weighted.statistic
+            "pvalue": spearman_spearman_score_weighted.pvalue,
         }
     }
 

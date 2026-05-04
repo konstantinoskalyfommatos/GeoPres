@@ -1,39 +1,51 @@
-# Goal
+# ALDRL (Approximate Low-Dimensional Representation Learning)
+
 This project aims to create a framework for dimensionality reduction of foundation embedding models.
 
+# Formal Research Problem
+
+Given a function $g: X \rightarrow Y \subseteq \mathbb{R}^n$, where $n$ is large, we aim to learn a function $f: Y \rightarrow \mathbb{R}^k$, where $k < n$, such that downstream task performance is preserved. If we acquire such a function, then for any input $x \in X$, the embedding $f(g(x)) \in \mathbb{R}^k$ serves as a low-dimensional representative for $g(x) \in \mathbb{R}^n$, significantly reducing computational cost without substantial loss in task performance.
+
 # Idea
-**Given an embedding model that maps input text into vectors in $R^n$, learn a function that maps the output vectors in a lower dimensional space such that, given a batch of high-dimensional vectors, the low-dimensional vectors preserve the pairwise cosine similarities and euclidean distances. Then, evaluate if this distance-cosine similarity preservation translates into downstream tasks performance preservation.**
 
-More formally, learn a function $$f : \mathbb{R}^n \to \mathbb{R}^k,$$ with $k << n$, such that given a set $X$ of points in $R^n$, $\forall x, y \in X$ $$\|x - y\| \approx \|f(x) - f(y)\|$$ and $$\cos{\theta_1} \approx \cos{\theta_2},$$ where $\theta_1, \theta_2$ are the angles between $x, y$ and $f(x), f(y)$ accordingly.
+We generate a large collection of high-dimensional vectors using $g$, which serve as training data for $f$, optimized via backpropagation. We make the assumption that $f$ preserving some intrinsic properties for any large set of high-dimensional vectors in $Y$ suffices to preserve downstream task performance. We also assume such a function exists and approximate it with a Neural Network.
 
-# Notes:
-- If $f$ also preserves norms (i.e. $\|x\| = \|f(x)\| \forall x \in X$), then preserving the cosine of two vectors is equivalent to preserving their dot product.
-- If $f(0) = 0 \in R^k$, then $f$ preserves the norms.
+# Model
 
-# Existing functions
-- The Johnson-Linderastrauss lemma states that a random matrix has the above properties (see [Random projections and applications to dimensionality reduction](https://cseweb.ucsd.edu/~akmenon/HonoursThesis.pdf) section 5.1.2 for dot product preservation).
+$f$ is modeled as a single-layer network with a ReLU activation. Despite its simplicity, this architecture proves sufficient for our purposes.
+
+# Loss Function
+
+We optimize $f$ by minimizing a pairwise Euclidean distance preservation loss. Formally, let $B = \{y_1, y_2, ..., y_m\} \subseteq \mathbb{R}^n$ be a training batch. Given $y_i, y_j \in B$, we denote with $d_{i,j}^{\text{h}}$ and $d_{i,j}^{\text{l}}$ the Euclidean distances between $y_i, y_j$, and $f(y_i), f(y_j)$ respectively (h stands for high, l for low). The loss is defined as:
+
+$$\mathcal{L} = \frac{1}{\binom{m}{2}} \sum_{i < j} \left( d_{i,j}^{\text{h}} - d_{i,j}^{\text{l}} \right)^2.$$
+
+Contrary to what one might expect, optimizing for Euclidean distance preservation consistently yields better results than optimizing for cosine similarity preservation.
 
 # Implementation
+
 ## Pipeline
-- Calculate a large number of embeddings -- output vectors (in $R^n$).
-- Define a simple Neural Network that maps these output vectors into a low dimensinal space.
-- Train the Network to preserve pairwise distances and cosine similarities for each batch. The loss function is:
 
-$\mathcal{L} = \frac{1}{N}\sum_{i<j} w_{ij} ( d_{\text{low}}(x_i, x_j) - d_{\text{high}}(x_i, x_j) )^2$,
-    
-where
+1. Precompute a large number of embeddings (output vectors in $\mathbb{R}^n$) using the backbone embedding model $g$.
+2. Define a single-layer neural network with ReLU activation that maps these vectors into a low-dimensional space $\mathbb{R}^k$.
+3. Train the network to preserve pairwise Euclidean distances using the loss function above.
 
-$w_{ij} = \frac{1}{(d_{\text{high}}(x_i, x_j) + \epsilon)^m}$,
+## Training Setup
 
-and N is the number of unique pairs in a batch.
-
+- **Training data**: 10 million English-only text passages sampled from the Colossal Clean Crawled Corpus (C4).
+- **Optimizer**: AdamW with learning rate $10^{-2}$ and weight decay $0.1$.
+- **Batch size**: 20,000 points.
+- **Scheduler**: Linear learning rate scheduler with warmup ratio of $0.1$.
+- **Epochs**: 10, with early stopping (patience of 3 evaluation steps).
+- **Validation**: 10,000 paraphrase pairs (20,000 data points) from `agentlans/sentence-paraphrases`.
 
 # Prerequisites
+
 To set up the project, create a uv environment at the project root level using the following commands:
 ```bash
 uv venv .venv --python 3.12
 source .venv/bin/activate
-uv pip install -r requirements.txt
+uv sync
 ```
 
 Then, create a `.env` file in the project root directory according to the `.env.example` file.

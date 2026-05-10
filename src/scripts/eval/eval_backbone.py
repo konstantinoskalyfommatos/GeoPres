@@ -34,6 +34,7 @@ if __name__ == "__main__":
 
     parser.add_argument("--overwrite_cache", action="store_true", help="Overwrite MTEB evaluation cache results")
     parser.add_argument("--backbone_dtype", type=str, default=None, help="dtype for backbone model (e.g., float16, bfloat16)")
+    parser.add_argument("--revision", type=str, default=None, help="Specific model revision/commit hash to load")
 
     args = parser.parse_args()
 
@@ -41,7 +42,12 @@ if __name__ == "__main__":
     if args.backbone_dtype:
         dtype = parse_dtype(args.backbone_dtype)
 
-    model = SentenceTransformer(args.backbone_model, device="cuda", trust_remote_code=True)
+    model = SentenceTransformer(
+        args.backbone_model, 
+        device="cuda", 
+        trust_remote_code=True,
+        revision=args.revision
+    )
     if dtype is not None:
         model = model.to(dtype=dtype)
     model.eval()

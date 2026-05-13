@@ -40,7 +40,7 @@ def extract_method(model_name):
         return 'base'
     
     if 'batch_20000_poslossfactor_1' in model_name and "weighted" not in model_name:
-        return 'custom'
+        return 'aldrl'
     elif '_pca' in model_name:
         return 'pca'
     elif 'random_projection' in model_name:
@@ -62,7 +62,7 @@ def create_grouped_bar_plots(
 ):
     """Create grouped bar charts for each task, grouped by dimensions."""
     colors = {
-        'custom': '#3b82f6',             # Blue
+        'aldrl': '#3b82f6',             # Blue
         'pca': '#d1d5db',                # Light Gray
         'random_projection': '#9ca3af',  # Gray
         'random_selection': '#6b7280',   # Dark Gray
@@ -74,7 +74,7 @@ def create_grouped_bar_plots(
     for model_base_name, include_in_mlr in models.items():
         truncation_label = 'Truncation (Matryoshka)' if include_in_mlr else 'Truncation'
         model_dim_reduction_methods = {
-            'custom': 'ALDRL (Ours)',
+            'aldrl': 'ALDRL (Ours)',
             'random_selection': 'Random Selection',
             'random_projection': 'Random Projection',
             'autoencoder': 'Autoencoder',
@@ -91,7 +91,7 @@ def create_grouped_bar_plots(
         )
         model_data = model_data.dropna(subset=['dimension'])
         model_data = model_data[model_data['dimension'] != 2]
-        valid_methods = ['base', 'custom', 'pca', 'random_projection', 'random_selection', 'truncation', 'autoencoder']
+        valid_methods = ['base', 'aldrl', 'pca', 'random_projection', 'random_selection', 'truncation', 'autoencoder']
         model_data = model_data[model_data['method'].isin(valid_methods)]
 
         if len(model_data) == 0:
@@ -105,7 +105,7 @@ def create_grouped_bar_plots(
             base_data = model_data[model_data['method'] == 'base']
             original_dim = base_data['dimension'].values[0] if len(base_data) > 0 else 'N/A'
             
-            fig.suptitle(f'{task_name} by Dimension: {model_base_name} (Original: {original_dim}D)', 
+            fig.suptitle(f'Score Retained ({task_name}): {model_base_name} (Original: {original_dim}D)',
                           fontsize=26, fontweight='bold')
 
             bar_width = 0.12
@@ -135,7 +135,7 @@ def create_grouped_bar_plots(
             last_pos = x_positions[-1]
 
             hatches = {
-                'custom': '///',
+                'aldrl': '///',
                 'pca': '',
                 'random_projection': '',
                 'random_selection': '',
@@ -148,14 +148,14 @@ def create_grouped_bar_plots(
                 values = all_values[method_key]
                 offset = (i - len(dim_reduction_methods) / 2 + 0.5) * bar_width
                 
-                # Apply hatch and edgecolor white for custom method
-                edgecolor = 'white' if method_key == 'custom' else None
-                linewidth = 1 if method_key == 'custom' else 0
+                # Apply hatch and edgecolor white for aldrl method
+                edgecolor = 'white' if method_key == 'aldrl' else None
+                linewidth = 1 if method_key == 'aldrl' else 0
 
                 bars = ax.bar([x + offset for x in x_positions], values, bar_width,
                               label=method_name, facecolor=colors[method_key], 
                               edgecolor=edgecolor, linewidth=linewidth,
-                              hatch=hatches.get(method_key, ''), alpha=0.9 if method_key == 'custom' else 0.8)
+                              hatch=hatches.get(method_key, ''), alpha=0.9 if method_key == 'aldrl' else 0.8)
 
                 for dim_idx, bar in enumerate(bars):
                     is_winner = winners[dim_idx] == method_key
@@ -173,7 +173,7 @@ def create_grouped_bar_plots(
                        color='gray', linestyle='--', linewidth=1.5)
 
             ax.set_xlabel('Embedding Dimension', fontsize=22)
-            ax.set_ylabel('Normalized Score (relative to original)', fontsize=22)
+            ax.set_ylabel('Score Retained', fontsize=22)
             ax.set_xticks(x_positions)
             if original_dim != 'N/A' and original_dim > 0:
                 x_labels = [f'{d} ({int(d/original_dim*100)}%)' for d in desired_dims]
@@ -227,7 +227,7 @@ if __name__ == "__main__":
     }
 
     dim_reduction_methods = {
-        'custom': 'ALDRL (Ours)',
+        'aldrl': 'ALDRL (Ours)',
         'autoencoder': 'Autoencoder',
         'random_selection': 'Random Selection',
         'random_projection': 'Random Projection',

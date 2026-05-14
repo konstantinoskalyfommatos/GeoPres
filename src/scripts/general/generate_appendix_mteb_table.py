@@ -60,7 +60,7 @@ def create_scatter_plot(df, output_dir, models):
         'autoencoder':      '#90a0b0',
     }
     method_labels = {
-        'custom':           'ALDRL (Ours)',
+        'custom':           'GPL (Ours)',
         'pca':              'PCA',
         'random_projection':'Random Projection',
         'random_selection': 'Random Selection',

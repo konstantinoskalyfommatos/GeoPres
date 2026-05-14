@@ -1,26 +1,25 @@
-# ALDRL (Approximate Low-Dimensional Representation Learning)
+# GPL (Geometric Preservation Learning)
 
 This project aims to create a framework for dimensionality reduction of foundation embedding models.
 
 # Formal Research Problem
 
-Given a function $g: X \rightarrow Y \subseteq \mathbb{R}^n$, where $n$ is large, we aim to learn a function $f: Y \rightarrow \mathbb{R}^k$, where $k < n$, such that downstream task performance is preserved. If we acquire such a function, then for any input $x \in X$, the embedding $f(g(x)) \in \mathbb{R}^k$ serves as a low-dimensional representative for $g(x) \in \mathbb{R}^n$, significantly reducing computational cost without substantial loss in task performance.
+Given a function $g: X \rightarrow Y \subseteq \mathbb{R}^n$, where $X$ is an arbitrary set and $n$ is large, we are interested in a function $f^*: Y \rightarrow \mathbb{R}^k$, $k < n$, with the property that downstream task performance achieved by $f^* \circ g$ closely matches that of $g$. With such a function, for any $x \in X$, the embedding $f^*(g(x)) \in \mathbb{R}^k$ serves as a low-dimensional representative of $g(x) \in\mathbb{R}^n$, significantly reducing computational cost without substantial loss in task performance.
 
 # Idea
 
-We generate a large collection of high-dimensional vectors using $g$, which serve as training data for $f$, optimized via backpropagation. We make the assumption that $f$ preserving some intrinsic properties for any large set of high-dimensional vectors in $Y$ suffices to preserve downstream task performance. We also assume such a function exists and approximate it with a Neural Network.
+The idea is simple: we generate a large collection of high-dimensional vectors using $g$, which serve as training data to approximate $f^*$ with a neural network $f \approx f^*$, optimized via backpropagation. This approach rests on two assumptions: the existence of $f^*$, and that intrinsic property preservation of any large set of vectors in the image of $g$ under $f^*$ implies preserved downstream task performance.
 
 # Model
 
-$f$ is modeled as a single-layer network with a ReLU activation. Despite its simplicity, this architecture proves sufficient for our purposes.
+Let $n$ and $k$ denote the source (high) and target (low) dimensionalities, 
+respectively. We model $f$ as a single-layer network with a ReLU activation. Despite its simplicity and the use of ReLU as the output activation, this architecture proves sufficient for our purposes.
 
 # Loss Function
 
-We optimize $f$ by minimizing a pairwise Euclidean distance preservation loss. Formally, let $B = \{y_1, y_2, ..., y_m\} \subseteq \mathbb{R}^n$ be a training batch. Given $y_i, y_j \in B$, we denote with $d_{i,j}^{\text{h}}$ and $d_{i,j}^{\text{l}}$ the Euclidean distances between $y_i, y_j$, and $f(y_i), f(y_j)$ respectively (h stands for high, l for low). The loss is defined as:
+We optimize $f$ by minimizing a pairwise distance preservation loss. Formally, let $Β = \{y_1, y_2, ... y_m\} \subseteq \mathbb{R}^n$ be a training batch. Then, given $y_i, y_j \in B$, we denote by $d_{i,j}^{\text\small{{h}}}$ and $d_{i,j}^{\text\small{{l}}}$ the Euclidean distances between $y_i, y_j$, and $f(y_i), f(y_j)$ respectively (h stands for high, l for low). The loss is defined as:
 
-$$\mathcal{L} = \frac{1}{\binom{m}{2}} \sum_{i < j} \left( d_{i,j}^{\text{h}} - d_{i,j}^{\text{l}} \right)^2.$$
-
-Contrary to what one might expect, optimizing for Euclidean distance preservation consistently yields better results than optimizing for cosine similarity preservation.
+$$\mathcal{L} = \frac{1}{\binom{m}{2}} \sum_{i < j} \left( d_{i,j}^{\text\small{{h}}} - d_{i,j}^{\text\small{{l}}} \right)^2.$$
 
 # Implementation
 

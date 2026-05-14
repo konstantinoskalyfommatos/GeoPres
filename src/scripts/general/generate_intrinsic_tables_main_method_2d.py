@@ -28,7 +28,7 @@ baselines = {
     'Random Selection': 'random_selection',
     'Autoencoder': 'autoencoder',
     'Truncation': 'truncation',
-    'ALDRL (Ours)': 'batch_20000_poslossfactor_1'
+    'GPL (Ours)': 'batch_20000_poslossfactor_1'
 }
 
 for backbone in backbones:

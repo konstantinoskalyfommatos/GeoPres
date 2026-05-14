@@ -21,11 +21,11 @@ dimensions = [32, 64, 128, 256]
 # Alternative loss function methods: (display_name, method_suffix)
 # Note: poslossfactor_0 = angular loss, poslossfactor_1 = positional (main) loss
 alternative_methods = {
-    'ALDRL (Angular)': 'batch_20000_poslossfactor_0',
-    'ALDRL (Angular W)': 'batch_20000_poslossfactor_0_weighted',
-    'ALDRL (Spearman)': 'batch_20000_spearman',
-    'ALDRL (Spearman W)': 'batch_20000_spearman_weighted',
-    'ALDRL (Ours)': 'batch_20000_poslossfactor_1'
+    'GPL (Angular)': 'batch_20000_poslossfactor_0',
+    'GPL (Angular W)': 'batch_20000_poslossfactor_0_weighted',
+    'GPL (Spearman)': 'batch_20000_spearman',
+    'GPL (Spearman W)': 'batch_20000_spearman_weighted',
+    'GPL (Ours)': 'batch_20000_poslossfactor_1'
 }
 
 for backbone in backbones:

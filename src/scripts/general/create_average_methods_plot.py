@@ -26,7 +26,7 @@ def extract_method(model_name):
     if '_distilled_' not in model_name:
         return 'base'
     if 'batch_20000_poslossfactor_1' in model_name and "weighted" not in model_name:
-        return 'aldrl'
+        return 'gpl'
     elif '_pca' in model_name:
         return 'pca'
     elif 'random_projection' in model_name:
@@ -51,7 +51,7 @@ def create_plot(df, output_dir, models):
     """
     # ── Colour palette per method (same as scatter plot) ─────────────────────
     method_colors = {
-        'aldrl':            '#377eb8',   # blue
+        'gpl':            '#377eb8',   # blue
         'pca':               '#e41a1c',   # red
         'random_projection': '#4daf4a',   # green
         'random_selection':  '#ff7f00',   # orange
@@ -59,14 +59,14 @@ def create_plot(df, output_dir, models):
         'autoencoder':       '#17becf',   # teal
     }
     method_labels = {
-        'aldrl':            'ALDRL (Ours)',
+        'gpl':            'GPL (Ours)',
         'pca':               'PCA',
         'random_projection': 'Random Projection',
         'random_selection':  'Random Selection',
         'truncation':        'Truncation',
         'autoencoder':       'Autoencoder',
     }
-    draw_order = ['aldrl', 'random_selection', 'random_projection',
+    draw_order = ['gpl', 'random_selection', 'random_projection',
                   'autoencoder', 'pca', 'truncation']
 
     valid_methods = list(method_colors.keys())

@@ -120,8 +120,6 @@ def create_plot(df, output_dir, models):
 
     # ── Figure ───────────────────────────────────────────────────────────────
     fig, ax = plt.subplots(figsize=(20, 12))
-    fig.suptitle('MTEB Score Retained: Method Comparison (Averaged Across Backbones)',
-                  fontsize=26, fontweight='bold')
 
     for method in draw_order:
         if method not in agg_mean.columns:
@@ -151,7 +149,7 @@ def create_plot(df, output_dir, models):
 
     ax.legend(handles=ax.get_legend_handles_labels()[0],
               labels=ax.get_legend_handles_labels()[1],
-              fontsize=16, loc='lower left', framealpha=0.9)
+              fontsize=16, loc='lower right', framealpha=0.9)
 
     plt.tight_layout()
     output_path = os.path.join(output_dir, 'average_methods_plot.png')

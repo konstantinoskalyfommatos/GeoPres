@@ -104,9 +104,6 @@ def create_grouped_bar_plots(
             # Get original dimension from base model data
             base_data = model_data[model_data['method'] == 'base']
             original_dim = base_data['dimension'].values[0] if len(base_data) > 0 else 'N/A'
-            
-            fig.suptitle(f'Score Retained ({task_name}): {model_base_name} (Original: {original_dim}D)',
-                          fontsize=26, fontweight='bold')
 
             bar_width = 0.12
             x_positions = range(len(desired_dims))

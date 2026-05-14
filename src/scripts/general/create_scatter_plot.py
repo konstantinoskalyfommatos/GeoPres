@@ -126,8 +126,6 @@ def create_scatter_plot(df, output_dir, models):
 
     # ── Figure ───────────────────────────────────────────────────────────────
     fig, ax = plt.subplots(figsize=(30, 20))
-    fig.suptitle('MTEB Score Retained vs. Dimensions Retained',
-                  fontsize=26, fontweight='bold')
 
     draw_order = ['gpl', 'random_selection', 'random_projection', 'autoencoder', 'pca', 'truncation']
 

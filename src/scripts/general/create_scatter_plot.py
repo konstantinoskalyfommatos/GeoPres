@@ -106,7 +106,7 @@ def create_scatter_plot(df, output_dir, models):
 
         for _, row in model_data.iterrows():
             ratio_retained = round(row['dimension'] / original_dim, 4)
-            norm_score  = row[column_name] / base_score
+            norm_score  = row[column_name] / base_score * 100
             records.append({
                 'backbone':    model_base_name,
                 'method':      row['method'],
@@ -145,22 +145,23 @@ def create_scatter_plot(df, output_dir, models):
             )
 
     # Baseline reference
-    ax.axhline(y=1.0, color='gray', linestyle='--', linewidth=1.5, zorder=1)
+    ax.axhline(y=100, color='gray', linestyle='--', linewidth=1.5, zorder=1)
 
     # Vertical dotted lines at each equidistant index position
     for idx in range(len(sorted_ratios)):
         ax.axvline(x=idx, color='gray', linestyle=':', linewidth=0.8, alpha=0.5, zorder=0)
 
     # ── Axes & styling ───────────────────────────────────────────────────────
-    ax.set_xlabel('Dimensions Retained Ratio', fontsize=22)
-    ax.set_ylabel('MTEB Score Retained Ratio\n(per-backbone normalization)', fontsize=22)
+    ax.set_xlabel('Dimensions Retained (%)', fontsize=36)
+    ax.set_ylabel('MTEB Score Retained (%)', fontsize=36)
 
     ax.set_xlim(-0.5, len(sorted_ratios) - 0.5)
-    ax.set_ylim(0.65, 1.0)
-    ax.set_yticks([0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1.0])
+    ax.set_ylim(50, 100)
+    ax.set_yticks([50, 60, 70, 80, 90, 100])
+    ax.set_yticklabels(['50', '60', '70', '80', '90', '100'], fontsize=44)
     ax.set_xticks(range(len(sorted_ratios)))
-    ax.set_xticklabels([f'{ratio:.2f} (n={backbone_counts[ratio]})' for ratio in sorted_ratios], fontsize=18)
-    ax.tick_params(axis='y', labelsize=18)
+    ax.set_xticklabels([f'{ratio * 100:.0f} (n={backbone_counts[ratio]})' for ratio in sorted_ratios], fontsize=34)
+    ax.tick_params(axis='y', labelsize=34)
     ax.grid(True, alpha=0.3, axis='y')
 
     # ── Legend: colour = method, shape = backbone ────────────────────────────
@@ -201,8 +202,8 @@ def create_scatter_plot(df, output_dir, models):
     ax.add_artist(backbone_legend)
 
     plt.tight_layout()
-    output_path = os.path.join(output_dir, 'scatter_plot.png')
-    plt.savefig(output_path, dpi=400, bbox_inches='tight')
+    output_path = os.path.join(output_dir, 'scatter_plot.pdf')
+    plt.savefig(output_path, bbox_inches='tight')
     print(f"Saved: {output_path}")
     plt.close()
 
@@ -214,7 +215,7 @@ if __name__ == "__main__":
     PLOTS_PATH = os.path.join(PROJECT_ROOT, "storage/plots/")
 
     os.makedirs(PLOTS_PATH, exist_ok=True)
-    for old_file in glob.glob(os.path.join(PLOTS_PATH, 'scatter_plot*')):
+    for old_file in glob.glob(os.path.join(PLOTS_PATH, 'scatter_plot.pdf')):
         os.remove(old_file)
 
     df = pd.read_csv(RESULTS_PATH)

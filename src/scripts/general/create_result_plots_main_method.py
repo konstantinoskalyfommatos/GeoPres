@@ -118,7 +118,7 @@ def create_grouped_bar_plots(
                 for dim in desired_dims:
                     dim_data = method_data[method_data['grouped_dim'] == dim]
                     if len(dim_data) > 0:
-                        values.append(dim_data[column_name].values[0] / base_score)
+                        values.append(dim_data[column_name].values[0] / base_score * 100)
                     else:
                         values.append(0)
                 all_values[method_key] = values
@@ -162,38 +162,40 @@ def create_grouped_bar_plots(
                     
                     height = bar.get_height()
                     if height > 0:
+                        label = f'{height:.0f}'
                         ax.text(bar.get_x() + bar.get_width() / 2., height + 0.01,
-                                f'{height:.2f}', ha='center', va='bottom', fontsize=12,
-                                fontweight='bold' if is_winner else 'normal')
+                                 label, ha='center', va='bottom', fontsize=22,
+                                 fontweight='bold')
 
-            ax.axhline(y=1.0, xmin=0, xmax=1.0,
-                       color='gray', linestyle='--', linewidth=1.5)
+            ax.axhline(y=100, xmin=0, xmax=1.0,
+                        color='gray', linestyle='--', linewidth=0.8, alpha=0.5)
 
-            ax.set_xlabel('Embedding Dimension', fontsize=22)
-            ax.set_ylabel('Score Retained', fontsize=22)
+            ax.set_xlabel('Embedding Dimension', fontsize=32)
+            ax.set_ylabel('Score Retained (%)', fontsize=32)
             ax.set_xticks(x_positions)
             if original_dim != 'N/A' and original_dim > 0:
                 x_labels = [f'{d} ({int(d/original_dim*100)}%)' for d in desired_dims]
             else:
                 x_labels = [str(d) for d in desired_dims]
-            ax.set_xticklabels(x_labels, fontsize=18)
+            ax.set_xticklabels(x_labels, fontsize=23)
             
             legend_handles = []
             for k, v in model_dim_reduction_methods.items():
                 legend_handles.append(Patch(facecolor=colors[k], label=v, hatch=hatches.get(k, ''), 
                                             edgecolor='white' if hatches.get(k, '') else None, linewidth=1 if hatches.get(k, '') else 0))
-            ax.legend(handles=legend_handles, fontsize=18, loc='best')
+            ax.legend(handles=legend_handles, fontsize=22, loc='lower left')
             
             ax.grid(True, alpha=0.3, axis='y')
-            ax.set_ylim(0, 1.1)
-            ax.set_yticks([0, 0.2, 0.4, 0.6, 0.8, 1.0])
+            ax.set_ylim(0, 105)
+            ax.set_yticks([0, 20, 40, 60, 80, 100])
+            ax.set_yticklabels(['0', '20', '40', '60', '80', '100'], fontsize=24)
 
             plt.tight_layout()
 
             safe_model_name = model_base_name.replace('/', '_')
             output_path = os.path.join(output_dir, 
-                f'{safe_model_name}_{task_name.lower()}_grouped_bar.png')
-            plt.savefig(output_path, dpi=300, bbox_inches='tight')
+                f'{safe_model_name}_{task_name.lower()}_grouped_bar.pdf')
+            plt.savefig(output_path, bbox_inches='tight')
             print(f"Saved grouped bar plot: {output_path}")
             plt.close()
 

@@ -94,7 +94,7 @@ def create_plot(df, output_dir, models):
 
         for _, row in model_data.iterrows():
             ratio_retained = round(row['dimension'] / original_dim, 4)
-            norm_score  = row[column_name] / base_score
+            norm_score  = row[column_name] / base_score * 100
             records.append({'backbone': model_base_name,
                             'method': row['method'],
                             'ratio_retained': ratio_retained,
@@ -132,28 +132,29 @@ def create_plot(df, output_dir, models):
                 color=color, label=method_labels[method])
 
     # Baseline reference
-    ax.axhline(y=1.0, color='gray', linestyle='--', linewidth=1.5, zorder=0)
+    ax.axhline(y=100, color='gray', linestyle='--', linewidth=1.5, zorder=0)
 
     # ── Axes & styling ───────────────────────────────────────────────────────
-    ax.set_xlabel('Dimensions Retained Ratio', fontsize=22)
-    ax.set_ylabel('MTEB Score Retained Ratio\n(mean across backbones)', fontsize=22)
+    ax.set_xlabel('Dimensions Retained (%)', fontsize=28)
+    ax.set_ylabel('MTEB Score Retained (%)', fontsize=28)
 
     ax.set_xlim(-0.45, len(ratio_bins) - 0.55)
-    ax.set_ylim(0.65, 1.05)
-    ax.set_yticks(np.arange(0.65, 1.06, 0.05))
+    ax.set_ylim(50, 102)
+    ax.set_yticks(np.arange(50, 105, 5))
+    ax.set_yticklabels([f'{int(t)}' for t in np.arange(50, 105, 5)], fontsize=18)
     ax.set_xticks(x_positions)
-    ax.set_xticklabels([f'{p:.2f} (n={backbone_counts[p]})' for p in ratio_bins],
-                       fontsize=18)
+    ax.set_xticklabels([f'{p * 100:.0f} (n={backbone_counts[p]})' for p in ratio_bins],
+                        fontsize=18)
     ax.tick_params(axis='y', labelsize=18)
     ax.grid(True, axis='y', alpha=0.3)
 
     ax.legend(handles=ax.get_legend_handles_labels()[0],
-              labels=ax.get_legend_handles_labels()[1],
-              fontsize=16, loc='lower right', framealpha=0.9)
+               labels=ax.get_legend_handles_labels()[1],
+               fontsize=20, loc='lower right', framealpha=0.9)
 
     plt.tight_layout()
-    output_path = os.path.join(output_dir, 'average_methods_plot.png')
-    plt.savefig(output_path, dpi=300, bbox_inches='tight')
+    output_path = os.path.join(output_dir, 'average_methods_plot.pdf')
+    plt.savefig(output_path, bbox_inches='tight')
     print(f"Saved: {output_path}")
     plt.close()
 
@@ -165,7 +166,7 @@ if __name__ == "__main__":
     PLOTS_PATH = os.path.join(PROJECT_ROOT, "storage/plots/")
 
     os.makedirs(PLOTS_PATH, exist_ok=True)
-    for old_file in glob.glob(os.path.join(PLOTS_PATH, '*.png')):
+    for old_file in glob.glob(os.path.join(PLOTS_PATH, '*.pdf')):
         os.remove(old_file)
 
     df = pd.read_csv(RESULTS_PATH)

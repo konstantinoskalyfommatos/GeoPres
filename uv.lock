@@ -3367,9 +3367,6 @@ requires-dist = [
     { name = "umap-learn" },
 ]
 
-[package.metadata.requires-dev]
-dev = []
-
 [[package]]
 name = "threadpoolctl"
 version = "3.6.0"

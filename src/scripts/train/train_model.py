@@ -55,6 +55,10 @@ def train_model(
     resume_from_checkpoint: str = None,
     weighted_loss: bool = False,
     eval_after_training: bool = False,
+    skip_sts: bool = False,
+    skip_retrieval: bool = False,
+    skip_classification: bool = False,
+    skip_clustering: bool = False,
     sts_batch_size: int = 4096,
     retrieval_batch_size: int = 6,
     classification_batch_size: int = 20,
@@ -171,10 +175,10 @@ def train_model(
         retrieval_batch_size=retrieval_batch_size,
         classification_batch_size=classification_batch_size,
         clustering_batch_size=clustering_batch_size,
-        skip_sts=False,
-        skip_retrieval=False,
-        skip_classification=False,
-        skip_clustering=False,
+        skip_sts=skip_sts,
+        skip_retrieval=skip_retrieval,
+        skip_classification=skip_classification,
+        skip_clustering=skip_clustering,
         overwrite_cache=overwrite_cache,
     )
 
@@ -222,6 +226,12 @@ def main():
 
     parser.add_argument("--skip_eval_after_training", action="store_true", help="Whether to evaluate the model after training")
     parser.add_argument("--overwrite_cache", action="store_true", help="Whether to overwrite cached evaluation results")
+    parser.add_argument("--linear", action="store_true", help="Do not use activation function")
+    parser.add_argument("--skip_sts", action="store_true", help="Skip STS evaluation")
+    parser.add_argument("--skip_classification", action="store_true", help="Skip classification evaluation")
+    parser.add_argument("--skip_retrieval", action="store_true", help="Skip retrieval evaluation")
+    parser.add_argument("--skip_clustering", action="store_true", help="Skip clustering evaluation")
+
 
     parser.add_argument("--sts_batch_size", type=int, default=3000, help="Batch size for STS evaluation")
     parser.add_argument("--retrieval_batch_size", type=int, default=6, help="Batch size for retrieval evaluation")
@@ -286,11 +296,13 @@ def main():
             if d.startswith("checkpoint-")
         ])
 
-    trainable_projection = nn.Sequential(
-        nn.Linear(args.backbone_model_output_dim, args.target_dim),
-        nn.ReLU(),
-    )
-    trainable_projection.to(torch.device("cuda"))
+    if args.linear:
+        trainable_projection = nn.Linear(args.backbone_model_output_dim, args.target_dim).to("cuda")
+    else:
+        trainable_projection = nn.Sequential(
+            nn.Linear(args.backbone_model_output_dim, args.target_dim),
+            nn.ReLU(),
+        ).to("cuda")
     
     logger.info("Preparing datasets")
     train_dataset = get_precalculated_embeddings_dataset(
@@ -333,6 +345,10 @@ def main():
         ),
         weighted_loss=args.weighted_loss,
         eval_after_training=not args.skip_eval_after_training,
+        skip_sts=args.skip_sts,
+        skip_retrieval=args.skip_retrieval,
+        skip_classification=args.skip_classification,
+        skip_clustering=args.skip_clustering,
         sts_batch_size=args.sts_batch_size,
         retrieval_batch_size=args.retrieval_batch_size,
         classification_batch_size=args.classification_batch_size,

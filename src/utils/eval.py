@@ -463,10 +463,9 @@ def evaluate_retrieval(
 
         "QuoraRetrieval",
         "HotpotQA",
-        "DBPedia",
         "NQ",
-        "MSMARCO"
-
+        "MSMARCO",
+        "DBPedia",
     ],
     languages: list[str] | None = None,
     batch_size: int = 6,

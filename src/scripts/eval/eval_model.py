@@ -32,6 +32,8 @@ if __name__ == "__main__":
     parser.add_argument("--overwrite_cache", action="store_true", help="Overwrite MTEB evaluation cache results")
     parser.add_argument("--fast_mode", action="store_true")
 
+    parser.add_argument("--linear", action="store_true", help="Do not use activation function")
+
     parser.add_argument("--intrinsic_only", action="store_true", help="Intrinsic only")
 
     parser.add_argument("--sts_batch_size", type=int, default=2048, help="Batch size for STS evaluation")
@@ -53,10 +55,14 @@ if __name__ == "__main__":
     if args.backbone_dtype:
         dtype = parse_dtype(args.backbone_dtype)
 
-    projection_head = nn.Sequential(
-        nn.Linear(args.backbone_model_output_dim, args.target_dim),
-        nn.ReLU(),
-    ).to("cuda")
+
+    if args.linear:
+        projection_head = nn.Linear(args.backbone_model_output_dim, args.target_dim).to("cuda")
+    else:
+        projection_head = nn.Sequential(
+            nn.Linear(args.backbone_model_output_dim, args.target_dim),
+            nn.ReLU(),
+        ).to("cuda")
 
     if args.spearman:
         model_name = (

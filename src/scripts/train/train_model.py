@@ -289,12 +289,17 @@ def main():
     
     logger.info("Creating trainable projection")
 
+    last_checkpoint = None
     if args.resume_from_checkpoint:
-        last_checkpoint = max([
-            int(d.split("checkpoint-")[-1])
-            for d in os.listdir(output_path)
-            if d.startswith("checkpoint-")
-        ])
+        try:
+            last_checkpoint = max([
+                int(d.split("checkpoint-")[-1])
+                for d in os.listdir(output_path)
+                if d.startswith("checkpoint-")
+            ])
+        except Exception:
+            # No checkpoint found, start from scratch
+            pass
 
     if args.linear:
         trainable_projection = nn.Linear(args.backbone_model_output_dim, args.target_dim).to("cuda")
@@ -340,7 +345,7 @@ def main():
         warmup_ratio=args.warmup_ratio,
         resume_from_checkpoint=(
             os.path.join(output_path, f"checkpoint-{last_checkpoint}")
-            if args.resume_from_checkpoint 
+            if last_checkpoint is not None
             else None
         ),
         weighted_loss=args.weighted_loss,

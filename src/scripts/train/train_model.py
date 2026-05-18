@@ -302,7 +302,11 @@ def main():
             pass
 
     if args.linear:
-        trainable_projection = nn.Linear(args.backbone_model_output_dim, args.target_dim).to("cuda")
+        trainable_projection = nn.Linear(
+            args.backbone_model_output_dim, 
+            args.target_dim,
+            bias=False
+        ).to("cuda")
     else:
         trainable_projection = nn.Sequential(
             nn.Linear(args.backbone_model_output_dim, args.target_dim),

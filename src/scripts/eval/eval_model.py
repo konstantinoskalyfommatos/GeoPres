@@ -57,7 +57,11 @@ if __name__ == "__main__":
 
 
     if args.linear:
-        projection_head = nn.Linear(args.backbone_model_output_dim, args.target_dim).to("cuda")
+        projection_head = nn.Linear(
+            args.backbone_model_output_dim, 
+            args.target_dim,
+            bias=False
+        ).to("cuda")
     else:
         projection_head = nn.Sequential(
             nn.Linear(args.backbone_model_output_dim, args.target_dim),

@@ -596,16 +596,6 @@ def evaluate_mteb(
             overwrite_cache=overwrite_cache
         )
         logger.info(f"Spearman correlation on STS test set: {sts_score:.4f}")
-    
-    if not skip_retrieval:
-        retrieval_score = evaluate_retrieval(
-            model=model,
-            cache_path=cache_path,
-            fast_mode=fast_mode,
-            batch_size=retrieval_batch_size,
-            overwrite_cache=overwrite_cache
-        )
-        logger.info(f"Retrieval NDCG@10 score: {retrieval_score:.4f}")
 
     if not skip_classification:
         classification_score = evaluate_classification(
@@ -626,3 +616,14 @@ def evaluate_mteb(
             overwrite_cache=overwrite_cache
         )
         logger.info(f"Clustering V-measure score: {clustering_score:.4f}")
+
+    if not skip_retrieval:
+        retrieval_score = evaluate_retrieval(
+            model=model,
+            cache_path=cache_path,
+            fast_mode=fast_mode,
+            batch_size=retrieval_batch_size,
+            overwrite_cache=overwrite_cache
+        )
+        logger.info(f"Retrieval NDCG@10 score: {retrieval_score:.4f}")
+        

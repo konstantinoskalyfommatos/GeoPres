@@ -1,6 +1,6 @@
-# GPL (Geometric Preservation Learning)
+# GeoPres
 
-This project aims to create a framework for dimensionality reduction of foundation embedding models.
+This project aims to develop a method for dimensionality reduction of foundation embedding models.
 
 # Formal Research Problem
 

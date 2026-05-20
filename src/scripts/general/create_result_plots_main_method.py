@@ -40,7 +40,7 @@ def extract_method(model_name):
         return 'base'
     
     if 'batch_20000_poslossfactor_1' in model_name and "weighted" not in model_name:
-        return 'gpl'
+        return 'GeoPres'
     elif '_pca' in model_name:
         return 'pca'
     elif 'random_projection' in model_name:
@@ -62,7 +62,7 @@ def create_grouped_bar_plots(
 ):
     """Create grouped bar charts for each task, grouped by dimensions."""
     colors = {
-        'gpl': '#3b82f6',             # Blue
+        'GeoPres': '#3b82f6',             # Blue
         'pca': '#d1d5db',                # Light Gray
         'random_projection': '#9ca3af',  # Gray
         'random_selection': '#6b7280',   # Dark Gray
@@ -74,7 +74,7 @@ def create_grouped_bar_plots(
     for model_base_name, include_in_mlr in models.items():
         truncation_label = 'Truncation (Matryoshka)' if include_in_mlr else 'Truncation'
         model_dim_reduction_methods = {
-            'gpl': 'GPL (Ours)',
+            'GeoPres': 'GeoPres (Ours)',
             'random_selection': 'Random Selection',
             'random_projection': 'Random Projection',
             'autoencoder': 'Autoencoder',
@@ -91,7 +91,7 @@ def create_grouped_bar_plots(
         )
         model_data = model_data.dropna(subset=['dimension'])
         model_data = model_data[model_data['dimension'] != 2]
-        valid_methods = ['base', 'gpl', 'pca', 'random_projection', 'random_selection', 'truncation', 'autoencoder']
+        valid_methods = ['base', 'GeoPres', 'pca', 'random_projection', 'random_selection', 'truncation', 'autoencoder']
         model_data = model_data[model_data['method'].isin(valid_methods)]
 
         if len(model_data) == 0:
@@ -132,7 +132,7 @@ def create_grouped_bar_plots(
             last_pos = x_positions[-1]
 
             hatches = {
-                'gpl': '///',
+                'GeoPres': '///',
                 'pca': '',
                 'random_projection': '',
                 'random_selection': '',
@@ -145,14 +145,14 @@ def create_grouped_bar_plots(
                 values = all_values[method_key]
                 offset = (i - len(dim_reduction_methods) / 2 + 0.5) * bar_width
                 
-                # Apply hatch and edgecolor white for gpl method
-                edgecolor = 'white' if method_key == 'gpl' else None
-                linewidth = 1 if method_key == 'gpl' else 0
+                # Apply hatch and edgecolor white for GeoPres method
+                edgecolor = 'white' if method_key == 'GeoPres' else None
+                linewidth = 1 if method_key == 'GeoPres' else 0
 
                 bars = ax.bar([x + offset for x in x_positions], values, bar_width,
                               label=method_name, facecolor=colors[method_key], 
                               edgecolor=edgecolor, linewidth=linewidth,
-                              hatch=hatches.get(method_key, ''), alpha=0.9 if method_key == 'gpl' else 0.8)
+                              hatch=hatches.get(method_key, ''), alpha=0.9 if method_key == 'GeoPres' else 0.8)
 
                 for dim_idx, bar in enumerate(bars):
                     is_winner = winners[dim_idx] == method_key
@@ -226,7 +226,7 @@ if __name__ == "__main__":
     }
 
     dim_reduction_methods = {
-        'gpl': 'GPL (Ours)',
+        'GeoPres': 'GeoPres (Ours)',
         'autoencoder': 'Autoencoder',
         'random_selection': 'Random Selection',
         'random_projection': 'Random Projection',

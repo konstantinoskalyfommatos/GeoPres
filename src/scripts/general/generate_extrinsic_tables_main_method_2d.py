@@ -28,7 +28,7 @@ baselines = {
     'Random Selection': 'random_selection',
     'Autoencoder': 'autoencoder',
     'Truncation': 'truncation',
-    'GPL (Ours)': 'batch_20000_poslossfactor_1'
+    'GeoPres (Ours)': 'batch_20000_poslossfactor_1'
 }
 
 def format_val(val):

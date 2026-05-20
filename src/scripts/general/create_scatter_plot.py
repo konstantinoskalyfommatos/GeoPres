@@ -26,7 +26,7 @@ def extract_method(model_name):
     if '_distilled_' not in model_name:
         return 'base'
     if 'batch_20000_poslossfactor_1' in model_name and "weighted" not in model_name:
-        return 'gpl'
+        return 'GeoPres'
     elif '_pca' in model_name:
         return 'pca'
     elif 'random_projection' in model_name:
@@ -53,7 +53,7 @@ def create_scatter_plot(df, output_dir, models):
 
     # ── Colour palette per method ────────────────────────────────────────────
     method_colors = {
-        'gpl':            '#377eb8',   # blue
+        'GeoPres':            '#377eb8',   # blue
         'pca':               '#e41a1c',   # red
         'random_projection': '#4daf4a',   # green
         'random_selection':  '#ff7f00',   # orange
@@ -61,7 +61,7 @@ def create_scatter_plot(df, output_dir, models):
         'autoencoder':       '#17becf',   # teal
     }
     method_labels = {
-        'gpl':            'GPL (Ours)',
+        'GeoPres':            'GeoPres (Ours)',
         'pca':               'PCA',
         'random_projection': 'Random Projection',
         'random_selection':  'Random Selection',
@@ -127,7 +127,7 @@ def create_scatter_plot(df, output_dir, models):
     # ── Figure ───────────────────────────────────────────────────────────────
     fig, ax = plt.subplots(figsize=(8.5, 9.75))
 
-    draw_order = ['gpl', 'random_selection', 'random_projection', 'autoencoder', 'pca', 'truncation']
+    draw_order = ['GeoPres', 'random_selection', 'random_projection', 'autoencoder', 'pca', 'truncation']
 
     for backbone in models.keys():
         shape = backbone_shapes.get(backbone, 'o')

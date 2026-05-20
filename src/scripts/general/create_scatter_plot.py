@@ -125,7 +125,7 @@ def create_scatter_plot(df, output_dir, models):
     backbone_counts = all_df.groupby('ratio_retained')['backbone'].nunique()
 
     # ── Figure ───────────────────────────────────────────────────────────────
-    fig, ax = plt.subplots(figsize=(30, 20))
+    fig, ax = plt.subplots(figsize=(8.5, 9.75))
 
     draw_order = ['gpl', 'random_selection', 'random_projection', 'autoencoder', 'pca', 'truncation']
 
@@ -152,16 +152,23 @@ def create_scatter_plot(df, output_dir, models):
         ax.axvline(x=idx, color='gray', linestyle=':', linewidth=0.8, alpha=0.5, zorder=0)
 
     # ── Axes & styling ───────────────────────────────────────────────────────
-    ax.set_xlabel('Dimensions Retained (%)', fontsize=36)
-    ax.set_ylabel('MTEB Score Retained (%)', fontsize=36)
+    ax.set_xlabel('Dimensions Retained (%)', fontsize=18)
+    ax.set_ylabel('MTEB Score Retained (%)', fontsize=18)
 
     ax.set_xlim(-0.5, len(sorted_ratios) - 0.5)
     ax.set_ylim(50, 100)
     ax.set_yticks([50, 60, 70, 80, 90, 100])
-    ax.set_yticklabels(['50', '60', '70', '80', '90', '100'], fontsize=44)
+    ax.set_yticklabels(['50', '60', '70', '80', '90', '100'], fontsize=14)
     ax.set_xticks(range(len(sorted_ratios)))
-    ax.set_xticklabels([f'{ratio * 100:.0f} (n={backbone_counts[ratio]})' for ratio in sorted_ratios], fontsize=34)
-    ax.tick_params(axis='y', labelsize=34)
+    ax.set_xticklabels(
+        [
+            f'(n={backbone_counts[ratio]}) {ratio * 100:.0f}'
+            for ratio in sorted_ratios
+        ],
+        fontsize=14,
+        rotation=45,
+    )
+    ax.tick_params(axis='y', labelsize=14)
     ax.grid(True, alpha=0.3, axis='y')
 
     # ── Legend: colour = method, shape = backbone ────────────────────────────
@@ -188,7 +195,7 @@ def create_scatter_plot(df, output_dir, models):
     method_legend = ax.legend(
         handles=method_handles,
         title='Reduction Method',
-        fontsize=28, title_fontsize=28,
+        fontsize=11, title_fontsize=11,
         loc='upper left', framealpha=0.9,
     )
     ax.add_artist(method_legend)
@@ -196,7 +203,7 @@ def create_scatter_plot(df, output_dir, models):
     backbone_legend = ax.legend(
         handles=backbone_handles,
         title='Backbone',
-        fontsize=28, title_fontsize=28,
+        fontsize=11, title_fontsize=11,
         loc='lower right', framealpha=0.9,
     )
     ax.add_artist(backbone_legend)

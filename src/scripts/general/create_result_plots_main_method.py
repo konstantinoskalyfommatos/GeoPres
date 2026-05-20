@@ -185,7 +185,7 @@ def create_grouped_bar_plots(
                                             edgecolor='white' if hatches.get(k, '') else None, linewidth=1 if hatches.get(k, '') else 0))
             ax.legend(handles=legend_handles, fontsize=22, loc='lower left')
             
-            ax.grid(True, alpha=0.3, axis='y')
+            ax.grid(False)
             ax.set_ylim(0, 105)
             ax.set_yticks([0, 20, 40, 60, 80, 100])
             ax.set_yticklabels(['0', '20', '40', '60', '80', '100'], fontsize=24)

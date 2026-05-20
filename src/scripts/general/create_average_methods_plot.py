@@ -119,7 +119,7 @@ def create_plot(df, output_dir, models):
     x_positions = np.arange(len(ratio_bins))
 
     # ── Figure ───────────────────────────────────────────────────────────────
-    fig, ax = plt.subplots(figsize=(20, 12))
+    fig, ax = plt.subplots(figsize=(15, 13))
 
     for method in draw_order:
         if method not in agg_mean.columns:
@@ -141,16 +141,16 @@ def create_plot(df, output_dir, models):
     ax.set_xlim(-0.45, len(ratio_bins) - 0.55)
     ax.set_ylim(50, 102)
     ax.set_yticks(np.arange(50, 105, 5))
-    ax.set_yticklabels([f'{int(t)}' for t in np.arange(50, 105, 5)], fontsize=18)
+    ax.set_yticklabels([f'{int(t)}' for t in np.arange(50, 105, 5)], fontsize=24)
     ax.set_xticks(x_positions)
-    ax.set_xticklabels([f'{p * 100:.0f} (n={backbone_counts[p]})' for p in ratio_bins],
-                        fontsize=18)
-    ax.tick_params(axis='y', labelsize=18)
-    ax.grid(True, axis='y', alpha=0.3)
+    ax.set_xticklabels([f'(n={backbone_counts[p]}) {p * 100:.0f}' for p in ratio_bins],
+                        fontsize=24, rotation=45)
+    ax.tick_params(axis='y', labelsize=24)
+    ax.grid(True, axis='both', alpha=0.3)
 
     ax.legend(handles=ax.get_legend_handles_labels()[0],
                labels=ax.get_legend_handles_labels()[1],
-               fontsize=20, loc='lower right', framealpha=0.9)
+               fontsize=25, loc='lower right', framealpha=0.9)
 
     plt.tight_layout()
     output_path = os.path.join(output_dir, 'average_methods_plot.pdf')
@@ -166,8 +166,6 @@ if __name__ == "__main__":
     PLOTS_PATH = os.path.join(PROJECT_ROOT, "storage/plots/")
 
     os.makedirs(PLOTS_PATH, exist_ok=True)
-    for old_file in glob.glob(os.path.join(PLOTS_PATH, '*.pdf')):
-        os.remove(old_file)
 
     df = pd.read_csv(RESULTS_PATH)
 

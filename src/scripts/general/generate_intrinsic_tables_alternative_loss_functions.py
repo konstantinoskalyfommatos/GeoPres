@@ -25,7 +25,7 @@ alternative_methods = {
     'GeoPres (Angular W)': 'batch_20000_poslossfactor_0_weighted',
     'GeoPres (Spearman)': 'batch_20000_spearman',
     'GeoPres (Spearman W)': 'batch_20000_spearman_weighted',
-    'GeoPres (Ours)': 'batch_20000_poslossfactor_1'
+    'GeoPres (Ours)': 'batch_20000_poslossfactor_1_linear'
 }
 
 for backbone in backbones:

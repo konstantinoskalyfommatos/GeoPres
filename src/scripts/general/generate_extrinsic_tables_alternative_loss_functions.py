@@ -24,7 +24,7 @@ baselines = {
     'Angular (W)': 'batch_20000_poslossfactor_0_weighted',
     'Spearman': 'batch_20000_spearman',
     'Spearman (W)': 'batch_20000_spearman_weighted',
-    'Positional (Ours)': 'batch_20000_poslossfactor_1',
+    'Positional (Ours)': 'batch_20000_poslossfactor_1_linear',
 }
 
 def format_val(val):

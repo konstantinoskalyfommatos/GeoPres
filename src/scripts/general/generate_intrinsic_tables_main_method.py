@@ -28,7 +28,7 @@ baselines = {
     'Random Selection': 'random_selection',
     'Truncation': 'truncation',
     'Autoencoder': 'autoencoder',
-    'GeoPres (Ours)': 'batch_20000_poslossfactor_1'
+    'GeoPres (Ours)': 'batch_20000_poslossfactor_1_linear'
 }
 
 for backbone in backbones:

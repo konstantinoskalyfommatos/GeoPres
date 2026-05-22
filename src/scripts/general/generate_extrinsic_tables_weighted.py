@@ -14,7 +14,7 @@ backbones = {
 dimensions = [32, 64, 128, 256]
 
 methods = {
-    'Positional Loss Unweighted': 'batch_20000_poslossfactor_1',
+    'Positional Loss Unweighted': 'batch_20000_poslossfactor_1_linear',
     'Positional Loss Weighted (Ours)': 'batch_20000_poslossfactor_1_weighted'
 }
 

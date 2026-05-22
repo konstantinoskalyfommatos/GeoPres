@@ -14,7 +14,7 @@ backbones = {
 dimensions = [32, 64, 128, 256]
 
 baselines = {
-    'Positional Loss Unweighted Ours': 'batch_20000_poslossfactor_1',
+    'Positional Loss Unweighted Ours': 'batch_20000_poslossfactor_1_linear',
     'Positional Loss Weighted (Ours)': 'batch_20000_poslossfactor_1_weighted'
 }
 

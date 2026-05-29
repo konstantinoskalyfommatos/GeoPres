@@ -5,8 +5,11 @@ import os
 from utils.config import EVALUATION_RESULTS_PATH, PROJECT_ROOT
 
 
-def get_desired_dimensions():
-    return [32, 64, 128, 256]
+def get_desired_dimensions(model_name=None):
+    base_dims = [32, 64, 128, 256]
+    if model_name and 'Qwen' in model_name:
+        return base_dims + [512]
+    return base_dims
 
 
 def extract_embedding_dim(model_name):
@@ -81,7 +84,7 @@ def create_grouped_bar_plots(
             'pca': 'PCA',
             'truncation': truncation_label
         }
-        desired_dims = get_desired_dimensions()
+        desired_dims = get_desired_dimensions(model_base_name)
         model_data = df[df['Model'].str.contains(model_base_name.replace('/', '__'))]
         model_data = model_data.copy()
         model_data['dimension'] = model_data['Model'].apply(extract_embedding_dim)

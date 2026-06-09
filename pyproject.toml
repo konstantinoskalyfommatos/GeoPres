@@ -17,11 +17,11 @@ dependencies = [
     "safetensors",
     "scikit-learn",
     "scipy",
-    "sentence-transformers",
+    "sentence-transformers==5.3.0",
     "torch",
     "torchsort",
     "tqdm",
-    "transformers",
+    "transformers==4.57.6",
     "umap-learn",
 ]
 

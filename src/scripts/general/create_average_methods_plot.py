@@ -66,6 +66,14 @@ def create_plot(df, output_dir, models):
         'truncation':        'Truncation',
         'autoencoder':       'Autoencoder',
     }
+    method_markers = {
+        'GeoPres':            'X',   # filled x
+        'pca':               'v',   # triangle down
+        'random_projection': 'P',   # filled plus
+        'random_selection':  '^',   # triangle up
+        'truncation':        'p',   # pentagon
+        'autoencoder':       'h',   # hexagon 2
+    }
     draw_order = ['GeoPres', 'random_selection', 'random_projection',
                   'autoencoder', 'pca', 'truncation']
 
@@ -128,29 +136,44 @@ def create_plot(df, output_dir, models):
         color = method_colors[method]
 
         ax.plot(x_positions, mean_vals,
-                marker='o', markersize=10, linewidth=2.5,
-                color=color, label=method_labels[method])
+                 marker=method_markers[method],
+                 markersize=16,          # Increased marker size
+                 linewidth=4.0,          # Thicker lines like reference
+                 color=color, 
+                 label=method_labels[method],
+                 markeredgecolor='black',# Black edge for definition
+                 markeredgewidth=0.5)    # Thin edge
 
     # Baseline reference
     ax.axhline(y=100, color='gray', linestyle='--', linewidth=1.5, zorder=0)
 
-    # ── Axes & styling ───────────────────────────────────────────────────────
+    # ─ Axes & styling ───────────────────────────────────────────────────────
     ax.set_xlabel('Dimensions Retained (%)', fontsize=28)
     ax.set_ylabel('MTEB Score Retained (%)', fontsize=28)
 
     ax.set_xlim(-0.45, len(ratio_bins) - 0.55)
-    ax.set_ylim(50, 102)
-    ax.set_yticks(np.arange(50, 105, 5))
-    ax.set_yticklabels([f'{int(t)}' for t in np.arange(50, 105, 5)], fontsize=24)
+    ax.set_ylim(65, 102)
+    ax.set_yticks(np.arange(70, 105, 5))
+    ax.set_yticklabels([f'{int(t)}' for t in np.arange(70, 105, 5)], fontsize=24)
     ax.set_xticks(x_positions)
     ax.set_xticklabels([f'(n={backbone_counts[p]}) {p * 100:.0f}' for p in ratio_bins],
                         fontsize=24, rotation=45)
     ax.tick_params(axis='y', labelsize=24)
-    ax.grid(True, axis='both', alpha=0.3)
+    
+    # Enhance grid to match reference style
+    ax.grid(True, axis='both', alpha=0.3, linestyle='-', linewidth=0.8)
+    
+    # Make spines (box) more visible like reference
+    for spine in ax.spines.values():
+        spine.set_linewidth(1.5)
+        spine.set_color('black')
 
-    ax.legend(handles=ax.get_legend_handles_labels()[0],
-               labels=ax.get_legend_handles_labels()[1],
-               fontsize=25, loc='lower right', framealpha=0.9)
+    # Update legend handle sizes to match the large markers
+    ax.legend(fontsize=25, 
+              loc='lower right', 
+              framealpha=0.9,
+              handlelength=2.0,
+              markerscale=1.0)
 
     plt.tight_layout()
     output_path = os.path.join(output_dir, 'average_methods_plot.pdf')

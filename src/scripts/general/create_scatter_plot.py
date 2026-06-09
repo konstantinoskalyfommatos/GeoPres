@@ -139,7 +139,7 @@ def create_scatter_plot(df, output_dir, models):
             color = method_colors[method]
             ax.scatter(
                 m_data['x_pos'], m_data['norm_score'],
-                marker=shape, s=500, color=color,
+                marker=shape, s=150, color=color,
                 edgecolors='black', linewidth=0.8,
                 zorder=3, alpha=0.9,
             )
@@ -156,7 +156,7 @@ def create_scatter_plot(df, output_dir, models):
     ax.set_ylabel('MTEB Score Retained (%)', fontsize=18)
 
     ax.set_xlim(-0.5, len(sorted_ratios) - 0.5)
-    ax.set_ylim(50, 100)
+    ax.set_ylim(50, 102)
     ax.set_yticks([50, 60, 70, 80, 90, 100])
     ax.set_yticklabels(['50', '60', '70', '80', '90', '100'], fontsize=14)
     ax.set_xticks(range(len(sorted_ratios)))

@@ -20,10 +20,8 @@ dimensions = [32, 64, 128, 256]
 
 # Alternative loss function methods: (display_name, method_suffix)
 baselines = {
-    'Angular': 'batch_20000_poslossfactor_0',
-    'Angular (W)': 'batch_20000_poslossfactor_0_weighted',
-    'Spearman': 'batch_20000_spearman',
-    'Spearman (W)': 'batch_20000_spearman_weighted',
+    'Angular': 'batch_20000_poslossfactor_0_linear',
+    'Spearman': 'batch_20000_spearman_linear',
     'Positional (Ours)': 'batch_20000_poslossfactor_1_linear',
 }
 

@@ -38,16 +38,16 @@ BACKBONES = [
      'tab:raw_mteb_scores_1',
      'The autoencoder failed to converge at a target dimension of 2.',
      [256, 128, 64, 32, 2]),
-    ('jinaai__jina-embeddings-v2-small-en', 512,
-     r'\texttt{jinaai/jina-embeddings-v2-small-en}',
-     'tab:raw_mteb_scores_2',
-     'The autoencoder failed to converge at a target dimension of 2.',
-     [256, 128, 64, 32, 2]),
     ('Qwen__Qwen3-Embedding-0.6B', 1024,
      r'\texttt{Qwen/Qwen3-Embedding-0.6B}',
-     'tab:raw_mteb_scores_3',
+     'tab:raw_mteb_scores_2',
      '',
      [512, 256, 128, 64, 32, 2]),
+    ('jinaai__jina-embeddings-v2-small-en', 512,
+     r'\texttt{jinaai/jina-embeddings-v2-small-en}',
+     'tab:raw_mteb_scores_3',
+     'The autoencoder failed to converge at a target dimension of 2.',
+     [256, 128, 64, 32, 2]),
     ('sentence-transformers__all-mpnet-base-v2', 768,
      r'\texttt{sentence-transformers/all-mpnet-base-v2}',
      'tab:raw_mteb_scores_4',
@@ -120,41 +120,23 @@ def generate_table(df, backbone_name, original_dim, model_display, label, note, 
     lines = []
 
     # Table header
-    lines.append('        \\begin{table*}[t]')
+    lines.append('        \\begin{table}[H]')
     lines.append('        \\centering')
     lines.append('        \\tiny')
     lines.append('        \\setlength{\\tabcolsep}{2.0pt}')
     lines.append('        \\renewcommand{\\arraystretch}{0.9}')
     lines.append('        \\resizebox{\\textwidth}{!}{%')
-    lines.append('        \\begin{tabular}{@{}c >{\\fontsize{5}{5}\\selectfont}l *{21}{>{\\centering\\arraybackslash}p{2.7em}}@{}}')
+    lines.append('        \\begin{tabular}{@{}c >{\\fontsize{5}{5}\\selectfont}l *{21}{>{\\centering\\arraybackslash}p{3em}}@{}}')
 
-    # Column header row (multi-line, matching tables.tex)
-    HEADER_GROUPS = [
-        ['STS12', 'STS13', 'STS14', 'STS15'],
-        ['STS16', 'STSBenchmark', 'SICK-R'],
-        ['QuoraRetrieval', 'HotpotQA', 'DBPedia'],
-        ['NQ', 'MSMARCO', 'ArguAna'],
-        ['AmazonCounterfactualClassification'],
-        ['AmazonPolarityClassification'],
-        ['AmazonReviewsClassification', 'ImdbClassification'],
-        ['ToxicConversationsClassification'],
-        ['ArxivClusteringS2S', 'RedditClustering'],
-        ['StackExchangeClustering'],
-    ]
-    lines.append('        \\textbf{Dim}\\rule{0pt}{4.0em} & \\textbf{Method}')
-    for group in HEADER_GROUPS:
-        headers = ' & '.join(f'\\diaghead{{{h}}}' for h in group)
-        # last group gets the trailing \\\\, others don't
-        if group is HEADER_GROUPS[-1]:
-            lines.append(f'          & {headers} \\\\')
-        else:
-            lines.append(f'          & {headers}')
+    # Column header row (single row, matching thesis.tex output)
+    all_headers = ' & '.join(f'\\diaghead{{{h}}}' for h in HEADERS)
+    lines.append(f'        \\textbf{{Dim}}\\rule{{0pt}}{{4.0em}} & \\textbf{{Method}} & {all_headers} \\\\')
 
     lines.append('        \\hline\\hline')
     lines.append('        \\noalign{\\vskip 0.4ex}')
 
     # Base model row (original dimension)
-    base_vals = [format_val(base_data[col], 4) for col in TASK_COLUMNS]
+    base_vals = [format_val(base_data[col], 3) for col in TASK_COLUMNS]
     base_row_str = '        \\textbf{' + str(original_dim) + '} & \\methodpad{--} & ' + ' & '.join(base_vals) + ' \\\\'
     lines.append(base_row_str)
     lines.append('        \\hline')
@@ -255,7 +237,7 @@ def generate_table(df, backbone_name, original_dim, model_display, label, note, 
     else:
         lines.append(f'        \\caption{{Raw task scores for {model_display}.}}')
     lines.append(f'        \\label{{{label}}}')
-    lines.append('        \\end{table*}')
+    lines.append('        \\end{table}')
     lines.append('        \\vspace*{\\fill}')
 
     return '\n'.join(lines)

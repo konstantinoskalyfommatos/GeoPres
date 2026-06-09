@@ -65,13 +65,13 @@ def create_grouped_bar_plots(
 ):
     """Create grouped bar charts for each task, grouped by dimensions."""
     colors = {
-        'GeoPres': '#3b82f6',             # Blue
-        'pca': '#d1d5db',                # Light Gray
-        'random_projection': '#9ca3af',  # Gray
-        'random_selection': '#6b7280',   # Dark Gray
-        'truncation': '#4b5563',         # Darker Gray
+        'GeoPres': '#417aa2',            # Muted blue (GeoPres)
+        'random_selection': '#d27f36',   # Muted orange (Random Selection)
+        'random_projection': '#499549',  # Muted green (Random Projection)
+        'autoencoder': '#3ca8b3',        # Muted cyan (Autoencoder)
+        'pca': '#b84646',                # Muted red (PCA)
+        'truncation': '#8d70a7',         # Muted purple (Truncation)
         'base': '#1f2937',               # Almost Black
-        'autoencoder': '#e5e7eb'         # Very Light Gray
     }
 
     for model_base_name, include_in_mlr in models.items():

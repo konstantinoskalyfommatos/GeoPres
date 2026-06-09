@@ -1,36 +1,19 @@
 # GeoPres
-
-This project aims to develop a method for dimensionality reduction of foundation embedding models.
+Official implementation of GeoPres.
 
 # Formal Research Problem
-
-Given a function $g: X \rightarrow Y \subseteq \mathbb{R}^n$, where $X$ is an arbitrary set and $n$ is large, we are interested in a function $f^*: Y \rightarrow \mathbb{R}^k$, $k < n$, with the property that downstream task performance achieved by $f^* \circ g$ closely matches that of $g$. With such a function, for any $x \in X$, the embedding $f^*(g(x)) \in \mathbb{R}^k$ serves as a low-dimensional representative of $g(x) \in\mathbb{R}^n$, significantly reducing computational cost without substantial loss in task performance.
+Given a function $g: X \rightarrow Y \subseteq \mathbb{R}^n$, where $X$ is an arbitrary set\footnote{In the present context, $X$ is a set of sentences, and $g$ maps these sentences into a vector space.} and $n$ is large, and given $k < n$, we are interested in a function $f^*: Y \rightarrow \mathbb{R}^k$, with the property that downstream task performance achieved by $f^* \circ g$ closely matches that of $g$. With such a function, for any $x \in X$, the embedding $f^*(g(x)) \in \mathbb{R}^k$ serves as a low-dimensional representative of $g(x) \in\mathbb{R}^n$, significantly reducing computational cost without substantial loss in task performance.
 
 # Idea
-
-The idea is simple: we generate a large collection of high-dimensional vectors using $g$, which serve as training data to approximate $f^*$ with a neural network $f \approx f^*$, optimized via backpropagation. This approach rests on two assumptions: the existence of $f^*$, and that intrinsic property preservation of any large set of vectors in the image of $g$ under $f^*$ implies preserved downstream task performance.
-
-# Model
-
-Let $n$ and $k$ denote the source (high) and target (low) dimensionalities, 
-respectively. We model $f$ as a single-layer network with a ReLU activation. Despite its simplicity and the use of ReLU as the output activation, this architecture proves sufficient for our purposes.
+Our approach is straightforward: we generate a large collection of high-dimensional vectors using $g$, which serve as training data to approximate $f^*$ with a linear model $f(y) = W y$, optimized via backpropagation using a distance-preserving loss function. This approach rests on two assumptions: first, that a linear function with the desired properties exists; and second, that preserving intrinsic properties for a large set of vectors in the image of $g$ is predictive of downstream task performance.
 
 # Loss Function
+We optimize $f$ by minimizing a pairwise distance preservation loss. Formally, let $\mathcal{B} = \{y_1, y_2, \dots, y_m\} \subseteq \mathbb{R}^n$ be a training batch. For $y_i, y_j \in \mathcal{B}$, let $d_{i,j}$ denote the Euclidean distance between $y_i$ and $y_j$, and let $d_{i,j}^{f}$ denote the Euclidean distance between $f(y_i)$ and $f(y_j)$. The loss is defined as
 
-We optimize $f$ by minimizing a pairwise distance preservation loss. Formally, let $Β = \{y_1, y_2, ... y_m\} \subseteq \mathbb{R}^n$ be a training batch. Then, given $y_i, y_j \in B$, we denote by $d_{i,j}^{\text\small{{h}}}$ and $d_{i,j}^{\text\small{{l}}}$ the Euclidean distances between $y_i, y_j$, and $f(y_i), f(y_j)$ respectively (h stands for high, l for low). The loss is defined as:
-
-$$\mathcal{L} = \frac{1}{\binom{m}{2}} \sum_{i < j} \left( d_{i,j}^{\text\small{{h}}} - d_{i,j}^{\text\small{{l}}} \right)^2.$$
+$$\mathcal{L} = \frac{1}{\binom{m}{2}} \sum_{i < j}\left( d_{i,j} - d_{i,j}^{f} \right)^2.$$
 
 # Implementation
-
-## Pipeline
-
-1. Precompute a large number of embeddings (output vectors in $\mathbb{R}^n$) using the backbone embedding model $g$.
-2. Define a single-layer neural network with ReLU activation that maps these vectors into a low-dimensional space $\mathbb{R}^k$.
-3. Train the network to preserve pairwise Euclidean distances using the loss function above.
-
 ## Training Setup
-
 - **Training data**: 10 million English-only text passages sampled from the Colossal Clean Crawled Corpus (C4).
 - **Optimizer**: AdamW with learning rate $10^{-2}$ and weight decay $0.1$.
 - **Batch size**: 20,000 points.
@@ -39,7 +22,6 @@ $$\mathcal{L} = \frac{1}{\binom{m}{2}} \sum_{i < j} \left( d_{i,j}^{\text\small{
 - **Validation**: 10,000 paraphrase pairs (20,000 data points) from `agentlans/sentence-paraphrases`.
 
 # Prerequisites
-
 To set up the project, create a uv environment at the project root level using the following commands:
 ```bash
 uv venv .venv --python 3.12

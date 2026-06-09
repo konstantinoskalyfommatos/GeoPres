@@ -18,7 +18,7 @@ from torch.utils.data import Dataset
 from transformers import TrainingArguments, EarlyStoppingCallback
 
 from utils.reduced_sentence_transformer import ReducedSentenceTransformer
-from utils.train import GeoPresTrainer
+from utils.geopres_trainer import GeoPresTrainer
 from utils.custom_datasets import get_precalculated_embeddings_dataset
 from utils.config import TRAINED_MODELS_PATH, EVALUATION_RESULTS_PATH, parse_dtype
 from utils.eval import evaluate_mteb, eval_intrinsic, find_checkpoint_lowest_val_loss

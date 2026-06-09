@@ -223,19 +223,16 @@ def main():
 
     parser.add_argument("--skip_eval_after_training", action="store_true", help="Whether to evaluate the model after training")
     parser.add_argument("--overwrite_cache", action="store_true", help="Whether to overwrite cached evaluation results")
-    parser.add_argument("--linear", action="store_true", help="Do not use activation function")
     parser.add_argument("--skip_sts", action="store_true", help="Skip STS evaluation")
     parser.add_argument("--skip_classification", action="store_true", help="Skip classification evaluation")
     parser.add_argument("--skip_retrieval", action="store_true", help="Skip retrieval evaluation")
     parser.add_argument("--skip_clustering", action="store_true", help="Skip clustering evaluation")
-
 
     parser.add_argument("--sts_batch_size", type=int, default=3000, help="Batch size for STS evaluation")
     parser.add_argument("--retrieval_batch_size", type=int, default=6, help="Batch size for retrieval evaluation")
     parser.add_argument("--classification_batch_size", type=int, default=20, help="Batch size for classification evaluation")
     parser.add_argument("--clustering_batch_size", type=int, default=16, help="Batch size for clustering evaluation")
 
-    # Quantization
     parser.add_argument("--backbone_dtype", type=str, default=None, help="dtype for backbone model (e.g., float16, bfloat16)")
 
     # Output configuration
@@ -290,17 +287,10 @@ def main():
             # No checkpoint found, start from scratch
             pass
 
-    if args.linear:
-        trainable_projection = nn.Linear(
-            args.backbone_model_output_dim, 
-            args.target_dim,
-            bias=False
-        ).to("cuda")
-    else:
-        trainable_projection = nn.Sequential(
-            nn.Linear(args.backbone_model_output_dim, args.target_dim),
-            nn.ReLU(),
-        ).to("cuda")
+    trainable_projection = nn.Sequential(
+        nn.Linear(args.backbone_model_output_dim, args.target_dim),
+        nn.ReLU(),
+    ).to("cuda")
     
     logger.info("Preparing datasets")
     train_dataset = get_precalculated_embeddings_dataset(

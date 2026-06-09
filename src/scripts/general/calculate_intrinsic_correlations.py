@@ -21,7 +21,7 @@ def _get_extrinsic_model_names() -> set:
         "_random_selection",
         "_truncation",
         "_autoencoder",
-        "_batch_20000_poslossfactor_1_linear",
+        "_batch_20000_poslossfactor_1",
     ]
 
     names = set()

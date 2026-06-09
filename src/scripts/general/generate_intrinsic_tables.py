@@ -40,7 +40,7 @@ baselines = [
     ('Random Selection', 'random_selection'),
     ('Truncation', 'truncation'),
     ('Autoencoder', 'autoencoder'),
-    (r'\method (Ours)', 'batch_20000_poslossfactor_1_linear'),
+    (r'\method (Ours)', 'batch_20000_poslossfactor_1'),
 ]
 
 num_metrics = len(intrinsic_cols)

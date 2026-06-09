@@ -62,7 +62,7 @@ METHODS = [
     ('RS', '_random_selection'),
     ('Trunc', '_truncation'),
     ('AE', '_autoencoder'),
-    (r'\method', '_batch_20000_poslossfactor_1_linear'),
+    (r'\method', '_batch_20000_poslossfactor_1'),
 ]
 
 # Headers matching the LaTeX table

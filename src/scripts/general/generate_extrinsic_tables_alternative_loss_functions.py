@@ -20,9 +20,9 @@ dimensions = [32, 64, 128, 256]
 
 # Alternative loss function methods: (display_name, method_suffix)
 baselines = {
-    'Angular': 'batch_20000_poslossfactor_0_linear',
-    'Spearman': 'batch_20000_spearman_linear',
-    'Positional (Ours)': 'batch_20000_poslossfactor_1_linear',
+    'Angular': 'batch_20000_poslossfactor_0',
+    'Spearman': 'batch_20000_spearman',
+    'Positional (Ours)': 'batch_20000_poslossfactor_1',
 }
 
 def format_val(val):

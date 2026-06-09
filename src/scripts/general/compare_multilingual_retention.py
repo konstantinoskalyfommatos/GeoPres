@@ -96,7 +96,7 @@ BACKBONES = {
 
 def _model_dir_name(backbone_key: str, dim: int) -> str:
     """Return the reduced model directory name for a given backbone and dim."""
-    return f"{backbone_key}_reduced_{dim}_batch_20000_poslossfactor_1_linear"
+    return f"{backbone_key}_reduced_{dim}_batch_20000_poslossfactor_1"
 
 
 # ---------------------------------------------------------------------------

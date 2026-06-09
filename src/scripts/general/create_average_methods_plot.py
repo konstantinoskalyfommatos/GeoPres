@@ -25,7 +25,7 @@ def extract_method(model_name):
     """Extract dimensionality reduction method from model name."""
     if '_reduced_' not in model_name:
         return 'base'
-    if 'batch_20000_poslossfactor_1_linear' in model_name and "weighted" not in model_name:
+    if 'batch_20000_poslossfactor_1' in model_name and "weighted" not in model_name:
         return 'GeoPres'
     elif '_pca' in model_name:
         return 'pca'

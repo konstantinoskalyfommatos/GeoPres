@@ -29,7 +29,7 @@ class PCAProjection(nn.Module):
 if __name__ == "__main__":
     parser = ArgumentParser(description="Evaluate a reduced SentenceTransformer model on STSBenchmark")
     parser.add_argument("--backbone_model", type=str, default="jinaai/jina-embeddings-v2-small-en", help="Name or path of the backbone SentenceTransformer model")
-    parser.add_argument("--backbone_model_output_dim", default=512, type=int)
+    parser.add_argument("--source_dim", default=512, type=int)
     
     parser.add_argument("--target_dim", type=int, default=32, help="Target dimension of the reduced embeddings")
     parser.add_argument("--skip_sts", action="store_true", help="Skip STS evaluation")

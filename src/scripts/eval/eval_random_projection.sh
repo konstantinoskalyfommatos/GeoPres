@@ -4,7 +4,7 @@
 
 python src/scripts/eval/eval_random_projection.py \
     --backbone_model "jinaai/jina-embeddings-v2-small-en" \
-    --backbone_model_output_dim 512 \
+    --source_dim 512 \
     --target_dim 32 \
     --sts_batch_size 2048 \
     --retrieval_batch_size 6 \

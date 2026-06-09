@@ -4,7 +4,7 @@
 
 python src/scripts/eval/eval_model.py \
     --backbone_model "jinaai/jina-embeddings-v2-small-en" \
-    --backbone_model_output_dim 512 \
+    --source_dim 512 \
     --checkpoint 4800 \
     --target_dim 32 \
     --positional_loss_factor 1.0 \

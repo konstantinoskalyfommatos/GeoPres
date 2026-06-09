@@ -21,7 +21,7 @@ def get_precalculated_embeddings_dataset(
     dataset_path: str, 
     model_name: str,
     split: str, 
-):
+) -> EmbeddingsDataset:
     output_path = os.path.join(
         PROJECT_ROOT,
         "storage",

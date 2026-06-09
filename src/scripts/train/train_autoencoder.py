@@ -260,7 +260,7 @@ def main():
     # Model configuration
     parser.add_argument("--backbone_model", type=str, default="jinaai/jina-embeddings-v2-small-en",
                         help="Backbone model name or path")
-    parser.add_argument("--backbone_model_output_dim", type=int, default=512)
+    parser.add_argument("--source_dim", type=int, default=512)
     parser.add_argument("--target_dim", type=int, default=32,
                         help="Latent (bottleneck) dimension")
 
@@ -322,7 +322,7 @@ def main():
 
     logger.info("Creating autoencoder")
     autoencoder = Autoencoder(
-        input_dim=args.backbone_model_output_dim,
+        input_dim=args.source_dim,
         latent_dim=args.target_dim,
     )
     autoencoder.to(torch.device("cuda"))

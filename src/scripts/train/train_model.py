@@ -195,7 +195,7 @@ def main():
     # Model configuration
     parser.add_argument("--backbone_model", type=str, default="jinaai/jina-embeddings-v2-small-en",
                        help="Backbone model name or path")
-    parser.add_argument("--backbone_model_output_dim", type=int, default=512)
+    parser.add_argument("--source_dim", type=int, default=512)
     parser.add_argument("--target_dim", type=int, default=32,
                        help="Target dimension for reduced embeddings")
     
@@ -287,7 +287,7 @@ def main():
             pass
 
     trainable_projection = nn.Sequential(
-        nn.Linear(args.backbone_model_output_dim, args.target_dim),
+        nn.Linear(args.source_dim, args.target_dim),
         nn.ReLU(),
     ).to("cuda")
     

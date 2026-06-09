@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 if __name__ == "__main__":
     parser = ArgumentParser(description="Evaluate a reduced SentenceTransformer model on STSBenchmark")
     parser.add_argument("--backbone_model", type=str, default="jinaai/jina-embeddings-v2-small-en", help="Name or path of the backbone SentenceTransformer model")
-    parser.add_argument("--backbone_model_output_dim", default=512, type=int)
+    parser.add_argument("--source_dim", default=512, type=int)
 
     parser.add_argument("--target_dim", type=int, default=32, help="Target dimension of the reduced embeddings")
     parser.add_argument("--skip_sts", action="store_true", help="Skip STS evaluation")
@@ -50,10 +50,10 @@ if __name__ == "__main__":
     indices = torch.arange(args.target_dim)
 
     # Create selection matrix
-    M = torch.zeros(args.backbone_model_output_dim, args.target_dim)
+    M = torch.zeros(args.source_dim, args.target_dim)
     M[indices, torch.arange(args.target_dim)] = 1.0
 
-    projection_head = nn.Linear(args.backbone_model_output_dim, args.target_dim, bias=False)
+    projection_head = nn.Linear(args.source_dim, args.target_dim, bias=False)
     projection_head.weight = nn.Parameter(M.t())
     projection_head = projection_head.to("cuda")
 

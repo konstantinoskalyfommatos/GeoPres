@@ -15,11 +15,6 @@ torch.manual_seed(42)
 logger = logging.getLogger(__name__)
 
 
-def collate_embeddings(features):
-    batched_embeddings = torch.stack(features, dim=0)
-    return {"input": batched_embeddings}
-
-
 class GeoPresTrainer(Trainer):
     def __init__(
         self,
@@ -32,6 +27,7 @@ class GeoPresTrainer(Trainer):
         **kwargs
     ):
         super().__init__(*args, **kwargs)
+        self.data_collator = self.collate_embeddings
         self.positional_loss_factor = positional_loss_factor
         self.target_dim = target_dim
         self.spearman = spearman
@@ -152,4 +148,8 @@ class GeoPresTrainer(Trainer):
             num_workers=self.args.dataloader_num_workers,
             pin_memory=self.args.dataloader_pin_memory,
         )
+    
+    @staticmethod
+    def collate_embeddings(features):
+        return {"input": torch.stack(features, dim=0)}
     

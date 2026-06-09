@@ -18,7 +18,7 @@ from torch.utils.data import Dataset
 from transformers import TrainingArguments, EarlyStoppingCallback
 
 from utils.reduced_sentence_transformer import ReducedSentenceTransformer
-from utils.train import GeoPresTrainer, collate_embeddings
+from utils.train import GeoPresTrainer
 from utils.custom_datasets import get_precalculated_embeddings_dataset
 from utils.config import TRAINED_MODELS_PATH, EVALUATION_RESULTS_PATH, parse_dtype
 from utils.eval import evaluate_mteb, eval_intrinsic, find_checkpoint_lowest_val_loss
@@ -106,7 +106,6 @@ def train_model(
         positional_loss_factor=positional_loss_factor,
         weighted_loss=weighted_loss,
         optimizers=(optimizer, None),
-        data_collator=collate_embeddings,
         callbacks=[
             EarlyStoppingCallback(
                 early_stopping_patience=3, 

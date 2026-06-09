@@ -68,15 +68,11 @@ class Autoencoder(nn.Module):
         return z, x_hat
 
 
-def collate_embeddings(features):
-    return {"input": torch.stack(features, dim=0)}
-
-
 class AutoencoderTrainer(Trainer):
     """Custom Trainer for the Autoencoder model."""
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.data_collator = self.collate_embeddings
 
     def compute_loss(self, model, inputs, *args, **kwargs) -> torch.Tensor:
         x = inputs["input"]
@@ -120,6 +116,10 @@ class AutoencoderTrainer(Trainer):
             num_workers=self.args.dataloader_num_workers,
             pin_memory=self.args.dataloader_pin_memory,
         )
+    
+    @staticmethod
+    def collate_embeddings(features):
+        return {"input": torch.stack(features, dim=0)}
     
 
 def train_autoencoder(
@@ -180,7 +180,6 @@ def train_autoencoder(
         train_dataset=train_dataset,
         eval_dataset=val_dataset,
         optimizers=(optimizer, None),
-        data_collator=collate_embeddings,
         callbacks=[
             EarlyStoppingCallback(
                 early_stopping_patience=3,

@@ -20,7 +20,7 @@ def collate_embeddings(features):
     return {"input": batched_embeddings}
 
 
-class SimilarityTrainer(Trainer):
+class GeoPresTrainer(Trainer):
     def __init__(
         self,
         *args,

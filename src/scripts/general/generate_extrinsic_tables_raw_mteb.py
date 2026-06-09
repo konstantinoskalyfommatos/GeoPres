@@ -147,7 +147,7 @@ def generate_table(df, backbone_name, original_dim, model_display, label, note, 
         # First pass: collect all method data for this dimension
         method_data = []  # list of (method_label, raw_values_list)
         for method_label, method_suffix in METHODS:
-            model_name = f'{backbone_name}_distilled_{dim}{method_suffix}'
+            model_name = f'{backbone_name}_reduced_{dim}{method_suffix}'
             row = df[df['Model'] == model_name]
 
             if len(row) == 0:

@@ -1,7 +1,7 @@
 """
-Main training script for distilled sentence transformers using the Sentence Transformers framework.
+Main training script for reduced sentence transformers using the Sentence Transformers framework.
 
-This script provides a simplified, high-level interface for training distilled models
+This script provides a simplified, high-level interface for training reduced models
 that follows Sentence Transformers best practices and conventions.
 """
 
@@ -17,7 +17,7 @@ from torch.utils.data import Dataset
 
 from transformers import TrainingArguments, EarlyStoppingCallback
 
-from utils.distilled_sentence_transformer import DistilledSentenceTransformer
+from utils.reduced_sentence_transformer import ReducedSentenceTransformer
 from utils.train import GeoPresTrainer, collate_embeddings
 from utils.custom_datasets import get_precalculated_embeddings_dataset
 from utils.config import TRAINED_MODELS_PATH, EVALUATION_RESULTS_PATH, parse_dtype
@@ -157,7 +157,7 @@ def train_model(
     # MTEB
     logger.info("Evaluating on MTEB benchmark")
 
-    sentence_transformer = DistilledSentenceTransformer(
+    sentence_transformer = ReducedSentenceTransformer(
         model_name_or_path=backbone_model,
         projection=trainable_projection,
         output_dim=target_dim,
@@ -191,14 +191,14 @@ def train_model(
 
 def main():
     """Main training function."""
-    parser = argparse.ArgumentParser(description="Train a distilled sentence transformer model")
+    parser = argparse.ArgumentParser(description="Train a reduced sentence transformer model")
     
     # Model configuration
     parser.add_argument("--backbone_model", type=str, default="jinaai/jina-embeddings-v2-small-en",
                        help="Backbone model name or path")
     parser.add_argument("--backbone_model_output_dim", type=int, default=512)
     parser.add_argument("--target_dim", type=int, default=32,
-                       help="Target dimension for distilled embeddings")
+                       help="Target dimension for reduced embeddings")
     
     # Training configuration
     parser.add_argument("--epochs", type=int, default=10,
@@ -251,7 +251,7 @@ def main():
     if args.spearman:
         model_name = (
             f"{args.backbone_model}"
-            f"_distilled_{args.target_dim}"
+            f"_reduced_{args.target_dim}"
             f"_batch_{args.train_batch_size}"
             "_spearman"
             f"{'_' + args.custom_suffix if args.custom_suffix else ''}"
@@ -259,7 +259,7 @@ def main():
     else:
         model_name = (
             f"{args.backbone_model}"
-            f"_distilled_{args.target_dim}"
+            f"_reduced_{args.target_dim}"
             f"_batch_{args.train_batch_size}"
             f"{'_poslossfactor_' + str(int(args.positional_loss_factor))}"
             f"{'_' + args.custom_suffix if args.custom_suffix else ''}"

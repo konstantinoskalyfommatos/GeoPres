@@ -6,7 +6,7 @@ import logging
 import json
 
 from utils.config import TRAINED_MODELS_PATH, EVALUATION_RESULTS_PATH, parse_dtype
-from utils.distilled_sentence_transformer import DistilledSentenceTransformer
+from utils.reduced_sentence_transformer import ReducedSentenceTransformer
 from utils.eval import evaluate_mteb, eval_intrinsic, find_checkpoint_lowest_val_loss
 
 
@@ -18,10 +18,10 @@ logger = logging.getLogger(__name__)
 
 
 if __name__ == "__main__":
-    parser = ArgumentParser(description="Evaluate a distilled SentenceTransformer model on MTEB and intrinsic metrics")
+    parser = ArgumentParser(description="Evaluate a reduced SentenceTransformer model on MTEB and intrinsic metrics")
     parser.add_argument("--backbone_model", type=str, default="jinaai/jina-embeddings-v2-small-en", help="Name or path of the backbone SentenceTransformer model")
     parser.add_argument("--backbone_model_output_dim", default=512, type=int)
-    parser.add_argument("--target_dim", type=int, default=32, help="Target dimension of the distilled embeddings")
+    parser.add_argument("--target_dim", type=int, default=32, help="Target dimension of the reduced embeddings")
     parser.add_argument("--train_batch_size", type=int, help="Batch size used for training", default=20000)
     parser.add_argument("--positional_loss_factor", type=int, default=1, help="factor for positional vs similarity loss")
     parser.add_argument("--skip_sts", action="store_true", help="Skip STS evaluation")
@@ -70,7 +70,7 @@ if __name__ == "__main__":
     if args.spearman:
         model_name = (
             f"{args.backbone_model}"
-            f"_distilled_{args.target_dim}"
+            f"_reduced_{args.target_dim}"
             f"_batch_{args.train_batch_size}"
             "_spearman"
             f"{'_' + args.custom_suffix if args.custom_suffix else ''}"
@@ -78,7 +78,7 @@ if __name__ == "__main__":
     else:
         model_name = (
             f"{args.backbone_model}"
-            f"_distilled_{args.target_dim}"
+            f"_reduced_{args.target_dim}"
             f"_batch_{args.train_batch_size}"
             f"{'_poslossfactor_' + str(int(args.positional_loss_factor))}"
             f"{'_' + args.custom_suffix if args.custom_suffix else ''}"
@@ -117,7 +117,7 @@ if __name__ == "__main__":
 
     # MTEB evaluation
     logger.info("Evaluating on MTEB benchmark")
-    custom_model = DistilledSentenceTransformer(
+    custom_model = ReducedSentenceTransformer(
         model_name_or_path=args.backbone_model,
         projection=projection_head,
         output_dim=args.target_dim,

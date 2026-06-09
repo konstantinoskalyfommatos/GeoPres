@@ -22,7 +22,7 @@ from transformers import Trainer, TrainingArguments, EarlyStoppingCallback
 
 from utils.custom_datasets import get_precalculated_embeddings_dataset
 from utils.config import TRAINED_AUTOENCODERS_PATH, EVALUATION_RESULTS_PATH, parse_dtype
-from utils.distilled_sentence_transformer import DistilledSentenceTransformer
+from utils.reduced_sentence_transformer import ReducedSentenceTransformer
 from utils.eval import evaluate_mteb, eval_intrinsic
 
 
@@ -222,7 +222,7 @@ def train_autoencoder(
 
     # MTEB evaluation using only the encoder half
     logger.info("Evaluating on MTEB benchmark")
-    sentence_transformer = DistilledSentenceTransformer(
+    sentence_transformer = ReducedSentenceTransformer(
         model_name_or_path=backbone_model,
         projection=autoencoder.encoder,
         output_dim=target_dim,
@@ -297,7 +297,7 @@ def main():
 
     model_name = (
         f"{args.backbone_model}"
-        f"_distilled_{args.target_dim}"
+        f"_reduced_{args.target_dim}"
         "_autoencoder"
     )
 

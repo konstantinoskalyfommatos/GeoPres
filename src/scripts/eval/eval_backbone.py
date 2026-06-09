@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 if __name__ == "__main__":
-    parser = ArgumentParser(description="Evaluate a distilled SentenceTransformer model on Benchmarks")
+    parser = ArgumentParser(description="Evaluate a reduced SentenceTransformer model on Benchmarks")
     parser.add_argument(
         "--backbone_model", type=str, 
         help="Name or path of the backbone SentenceTransformer model",

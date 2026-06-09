@@ -1,8 +1,8 @@
 """
 Multilingual Retention Analysis for Dimensionality-Reduced Embedding Models.
 
-Computes retention ratios (distilled score / backbone score) per language across
-all distilled models and reports the retention gap (non-English minus English)
+Computes retention ratios (reduced score / backbone score) per language across
+all reduced models and reports the retention gap (non-English minus English)
 to assess whether English-only training biases the reduction.
 
 Descriptive analysis only --- no statistical tests.
@@ -72,7 +72,7 @@ BACKBONES = {
         / "results"
         / "Alibaba-NLP__gte-multilingual-base"
         / "9bbca17d9273fd0d03d5725c7a4b0f6b45142062",
-        "distilled_base": BASE
+        "reduced_base": BASE
         / "trained_models"
         / "Alibaba-NLP__gte-multilingual-base"
         / "results",
@@ -85,7 +85,7 @@ BACKBONES = {
         / "results"
         / "Qwen__Qwen3-Embedding-0.6B"
         / "c54f2e6e80b2d7b7de06f51cec4959f6b3e03418",
-        "distilled_base": BASE
+        "reduced_base": BASE
         / "trained_models"
         / "Qwen__Qwen3-Embedding-0.6B"
         / "results",
@@ -95,8 +95,8 @@ BACKBONES = {
 
 
 def _model_dir_name(backbone_key: str, dim: int) -> str:
-    """Return the distilled model directory name for a given backbone and dim."""
-    return f"{backbone_key}_distilled_{dim}_batch_20000_poslossfactor_1_linear"
+    """Return the reduced model directory name for a given backbone and dim."""
+    return f"{backbone_key}_reduced_{dim}_batch_20000_poslossfactor_1_linear"
 
 
 # ---------------------------------------------------------------------------
@@ -108,7 +108,7 @@ def collect_data() -> pd.DataFrame:
     Build a DataFrame with one row per (backbone, dim, language).
 
     Columns:
-        backbone, dim, language, backbone_score, distilled_score, retention_ratio
+        backbone, dim, language, backbone_score, reduced_score, retention_ratio
     """
     rows: list[dict[str, Any]] = []
 
@@ -121,29 +121,29 @@ def collect_data() -> pd.DataFrame:
         backbone_scores = load_scores(backbone_json)
 
         for dim in info["dims"]:
-            model_dir = info["distilled_base"] / _model_dir_name(backbone_key, dim)
-            distilled_json = _find_json(model_dir, TASK)
-            if distilled_json is None:
-                print(f"[WARN] Distilled JSON not found for {backbone_key} dim={dim}", file=sys.stderr)
+            model_dir = info["reduced_base"] / _model_dir_name(backbone_key, dim)
+            reduced_json = _find_json(model_dir, TASK)
+            if reduced_json is None:
+                print(f"[WARN] Reduced JSON not found for {backbone_key} dim={dim}", file=sys.stderr)
                 continue
 
-            distilled_scores = load_scores(distilled_json)
+            reduced_scores = load_scores(reduced_json)
 
             for lang in backbone_scores:
-                if lang not in distilled_scores:
+                if lang not in reduced_scores:
                     continue
                 backbone_score = backbone_scores[lang]
-                distilled_score = distilled_scores[lang]
+                reduced_score = reduced_scores[lang]
                 if backbone_score == 0:
                     continue
-                retention = distilled_score / backbone_score
+                retention = reduced_score / backbone_score
                 rows.append(
                     {
                         "backbone": backbone_key,
                         "dim": dim,
                         "language": lang,
                         "backbone_score": backbone_score,
-                        "distilled_score": distilled_score,
+                        "reduced_score": reduced_score,
                         "retention_ratio": retention,
                     }
                 )
@@ -160,7 +160,7 @@ def analyse_retention(df: pd.DataFrame) -> None:
 
     # --- 1. Retention ratio table per backbone / dim / language ---------------
     print("=" * 80)
-    print("RETENTION RATIOS (distilled_score / backbone_score)")
+    print("RETENTION RATIOS (reduced_score / backbone_score)")
     print("=" * 80)
 
     for backbone_key in sorted(df["backbone"].unique()):

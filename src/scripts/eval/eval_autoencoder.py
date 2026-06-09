@@ -5,7 +5,7 @@ import os
 import logging
 
 from utils.config import TRAINED_AUTOENCODERS_PATH, EVALUATION_RESULTS_PATH, parse_dtype
-from utils.distilled_sentence_transformer import DistilledSentenceTransformer
+from utils.reduced_sentence_transformer import ReducedSentenceTransformer
 from utils.eval import evaluate_mteb, eval_intrinsic
 from scripts.train.train_autoencoder import Autoencoder
 
@@ -18,10 +18,10 @@ logger = logging.getLogger(__name__)
 
 
 if __name__ == "__main__":
-    parser = ArgumentParser(description="Evaluate a distilled SentenceTransformer model on MTEB and intrinsic metrics")
+    parser = ArgumentParser(description="Evaluate a reduced SentenceTransformer model on MTEB and intrinsic metrics")
     parser.add_argument("--backbone_model", type=str, default="jinaai/jina-embeddings-v2-small-en", help="Name or path of the backbone SentenceTransformer model")
     parser.add_argument("--backbone_model_output_dim", default=512, type=int)
-    parser.add_argument("--target_dim", type=int, default=32, help="Target dimension of the distilled embeddings")
+    parser.add_argument("--target_dim", type=int, default=32, help="Target dimension of the reduced embeddings")
     
     parser.add_argument("--skip_sts", action="store_true", help="Skip STS evaluation")
     parser.add_argument("--skip_classification", action="store_true", help="Skip classification evaluation")
@@ -54,7 +54,7 @@ if __name__ == "__main__":
 
     model_name = (
         f"{args.backbone_model}"
-        f"_distilled_{args.target_dim}"
+        f"_reduced_{args.target_dim}"
         "_autoencoder"
     )
 
@@ -90,7 +90,7 @@ if __name__ == "__main__":
 
     # MTEB evaluation
     logger.info("Evaluating on MTEB benchmark")
-    custom_model = DistilledSentenceTransformer(
+    custom_model = ReducedSentenceTransformer(
         model_name_or_path=args.backbone_model,
         projection=autoencoder.encoder,
         output_dim=args.target_dim,

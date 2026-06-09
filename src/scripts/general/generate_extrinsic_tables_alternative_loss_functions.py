@@ -49,7 +49,7 @@ for backbone in backbones:
         first_in_dim = True
 
         for method_name, method_suffix in baselines.items():
-            model_name = f"{backbone}_distilled_{dim}_{method_suffix}"
+            model_name = f"{backbone}_reduced_{dim}_{method_suffix}"
             row = df[df['Model'] == model_name]
 
             if len(row) == 0:

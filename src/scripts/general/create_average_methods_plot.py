@@ -8,8 +8,8 @@ from utils.config import EVALUATION_RESULTS_PATH, PROJECT_ROOT
 
 def extract_embedding_dim(model_name):
     """Extract embedding dimension from model name."""
-    if '_distilled_' in model_name:
-        parts = model_name.split('_distilled_')
+    if '_reduced_' in model_name:
+        parts = model_name.split('_reduced_')
         dim_part = parts[1].split('_')[0]
         return int(dim_part)
     elif 'gte-multilingual-base' in model_name or "all-mpnet-base-v2" in model_name:
@@ -23,7 +23,7 @@ def extract_embedding_dim(model_name):
 
 def extract_method(model_name):
     """Extract dimensionality reduction method from model name."""
-    if '_distilled_' not in model_name:
+    if '_reduced_' not in model_name:
         return 'base'
     if 'batch_20000_poslossfactor_1_linear' in model_name and "weighted" not in model_name:
         return 'GeoPres'

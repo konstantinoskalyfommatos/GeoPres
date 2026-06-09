@@ -62,7 +62,7 @@ for backbone in backbones:
         print("\\midrule")
 
         for method_name, method_suffix in baselines:
-            model_name = f"{backbone}_distilled_{dim}_{method_suffix}"
+            model_name = f"{backbone}_reduced_{dim}_{method_suffix}"
             row = df[df['Model'] == model_name]
 
             if len(row) == 0:

@@ -26,11 +26,11 @@ class ProjectionHead(nn.Module):
         })
         return features
 
-class DistilledSentenceTransformer(SentenceTransformer):
-    """A SentenceTransformer wrapper for our distilled models.
+class ReducedSentenceTransformer(SentenceTransformer):
+    """A SentenceTransformer wrapper for our reduced models.
     
     This class extends SentenceTransformer to integrate our 
-    custom distillation approach with the standard Sentence 
+    custom reduction approach with the standard Sentence 
     Transformers framework, providing a familiar API.
     """
     
@@ -85,8 +85,8 @@ class DistilledSentenceTransformer(SentenceTransformer):
                 return module
         raise AttributeError("ProjectionHead not found in model modules.")
 
-    def load_checkpoint(self, path: str, **kwargs) -> 'DistilledSentenceTransformer':
-        """Loads a saved distilled model checkpoint."""
+    def load_checkpoint(self, path: str, **kwargs) -> 'ReducedSentenceTransformer':
+        """Loads a saved reduced model checkpoint."""
         if not os.path.exists(path):
             raise ValueError(f"Path {path} does not exist.")
         

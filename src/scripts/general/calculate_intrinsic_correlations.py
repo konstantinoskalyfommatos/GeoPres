@@ -28,7 +28,7 @@ def _get_extrinsic_model_names() -> set:
     for backbone in BACKBONES:
         for dim in DIM_GROUPS:
             for suffix in METHOD_SUFFIXES:
-                names.add(f"{backbone}_distilled_{dim}{suffix}")
+                names.add(f"{backbone}_reduced_{dim}{suffix}")
     return names
 
 

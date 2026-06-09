@@ -1,6 +1,7 @@
 import torch
+import torch.nn as nn
 import logging
-from transformers import Trainer
+from transformers import Trainer, TrainingArguments
 from torch.utils.data import DataLoader
 
 from utils.eval import (
@@ -16,24 +17,66 @@ logger = logging.getLogger(__name__)
 
 
 class GeoPresTrainer(Trainer):
+    """Trainer subclass for GeoPres dimensionality reduction."""
+
+    default_training_args = TrainingArguments(
+        output_dir="./output",
+        num_train_epochs=10,
+        per_device_train_batch_size=20000,
+        per_device_eval_batch_size=20000,
+        weight_decay=0.1,
+        eval_strategy="steps",
+        eval_steps=100,
+        logging_dir="./logs",
+        logging_strategy="steps",
+        logging_steps=100,
+        save_strategy="steps",
+        save_steps=100,
+        save_total_limit=None,
+        load_best_model_at_end=True,
+        metric_for_best_model="eval_loss",
+        dataloader_drop_last=True,
+        disable_tqdm=False,
+        warmup_ratio=0.1,
+        lr_scheduler_type="linear",
+        dataloader_pin_memory=True,
+    )
+    """To be used as training args unless specified."""
+
     def __init__(
         self,
-        *args,
-        target_dim: int,
-        spearman: bool,
+        source_dim: int | None = None,
+        target_dim: int | None = None,
+        device: str | None = "cuda",
+        spearman: bool = False,
         spearman_local_or_global: str = "local",
         positional_loss_factor: float = 1.0,
         weighted_loss: bool = False,
         **kwargs
     ):
-        super().__init__(*args, **kwargs)
+        if kwargs.get("args") is None:
+            kwargs["args"] = self.default_training_args
+
+        # Auto-initialize model if not provided but dimensions are
+        model = kwargs.get("model")
+        if model is None:
+            if source_dim is None or target_dim is None:
+                raise ValueError(
+                    "Either 'model' or both 'source_dim' and 'target_dim' "
+                    "must be provided to GeoPresTrainer."
+                )
+            logger.info(
+                "No model provided, initializing matrix mapping "
+                f"R^{source_dim} to R^{target_dim}"
+            ) 
+            kwargs["model"] = nn.Linear(source_dim, target_dim, bias=False, device=device)
+
+        super().__init__(**kwargs)
         self.data_collator = self.collate_embeddings
         self.positional_loss_factor = positional_loss_factor
-        self.target_dim = target_dim
         self.spearman = spearman
         self.spearman_local_or_global = spearman_local_or_global
         self.weighted_loss = weighted_loss
-
 
     def compute_loss(self, model, inputs, *args, **kwargs) -> torch.Tensor:
         """Compute the combined loss for distillation."""

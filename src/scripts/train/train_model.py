@@ -100,7 +100,6 @@ def train_model(
         args=args,
         train_dataset=train_dataset,
         eval_dataset=val_dataset,
-        target_dim=target_dim,
         spearman=spearman,
         spearman_local_or_global=spearman_local_or_global,
         positional_loss_factor=positional_loss_factor,
@@ -286,10 +285,12 @@ def main():
             # No checkpoint found, start from scratch
             pass
 
-    trainable_projection = nn.Sequential(
+    trainable_projection = nn.Linear(
         nn.Linear(args.source_dim, args.target_dim),
         nn.ReLU(),
-    ).to("cuda")
+        bias=False,
+        device="cuda"
+    )
     
     logger.info("Preparing datasets")
     train_dataset = get_precalculated_embeddings_dataset(

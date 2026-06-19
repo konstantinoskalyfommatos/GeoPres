@@ -18,9 +18,8 @@ from torch.utils.data import Dataset
 from transformers import TrainingArguments, EarlyStoppingCallback
 
 from utils.reduced_sentence_transformer import ReducedSentenceTransformer
-from utils.geopres_trainer import GeoPresTrainer
-from utils.custom_datasets import get_precalculated_embeddings_dataset
-from utils.config import TRAINED_MODELS_PATH, EVALUATION_RESULTS_PATH, parse_dtype
+from utils.geopres_trainer import GeoPresTrainer, EmbeddingsDataset
+from utils.config import TRAINED_MODELS_PATH, EVALUATION_RESULTS_PATH, PROJECT_ROOT, parse_dtype
 from utils.eval import evaluate_mteb, eval_intrinsic, find_checkpoint_lowest_val_loss
 
 
@@ -286,23 +285,38 @@ def main():
             pass
 
     trainable_projection = nn.Linear(
-        nn.Linear(args.source_dim, args.target_dim),
-        nn.ReLU(),
+        args.source_dim, 
+        args.target_dim,
         bias=False,
         device="cuda"
     )
     
     logger.info("Preparing datasets")
-    train_dataset = get_precalculated_embeddings_dataset(
-        dataset_path="allenai/c4",
-        model_name=args.backbone_model.replace("/", "__"),
-        split="train",
+    # Load the precalculated training embeddings
+    train_tensor_path = os.path.join(
+        PROJECT_ROOT,
+        "storage",
+        "precalculated_embeddings",
+        "c4",
+        args.backbone_model.replace("/", "__"),
+        "train_embeddings.pt"
     )
-    val_dataset = get_precalculated_embeddings_dataset(
-        dataset_path="sentence-paraphrases",
-        model_name=args.backbone_model.replace("/", "__"),
-        split="validation",
+    if not os.path.exists(train_tensor_path):
+        raise FileNotFoundError(f"Precalculated embeddings not found at {train_tensor_path}")
+    train_dataset = EmbeddingsDataset(torch.load(train_tensor_path))
+
+    # Load the precalculated validation embeddings
+    val_tensor_path = os.path.join(
+        PROJECT_ROOT,
+        "storage",
+        "precalculated_embeddings",
+        "sentence-paraphrases",
+        args.backbone_model.replace("/", "__"),
+        "validation_embeddings.pt"
     )
+    if not os.path.exists(val_tensor_path):
+        raise FileNotFoundError(f"Precalculated embeddings not found at {val_tensor_path}")
+    val_dataset = EmbeddingsDataset(torch.load(val_tensor_path))
 
     # Train the model
     logger.info("Starting training")

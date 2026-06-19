@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import logging
 from transformers import Trainer, TrainingArguments
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Dataset
 
 from utils.eval import (
     compute_positional_loss, 
@@ -14,6 +14,18 @@ from utils.eval import (
 torch.manual_seed(42)
 
 logger = logging.getLogger(__name__)
+
+
+class EmbeddingsDataset(Dataset):
+    def __init__(self, embeddings: torch.Tensor):
+        self.embeddings = embeddings
+
+    def __len__(self):
+        return len(self.embeddings)
+
+    def __getitem__(self, idx):
+        return self.embeddings[idx]
+    
 
 
 class GeoPresTrainer(Trainer):

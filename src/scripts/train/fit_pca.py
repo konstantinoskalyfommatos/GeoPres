@@ -7,14 +7,13 @@ import torch
 
 from sklearn.decomposition import PCA
 
-from utils.custom_datasets import get_precalculated_embeddings_dataset
+from utils.geopres_trainer import EmbeddingsDataset
 from utils.config import PROJECT_ROOT
 
 
 def fit_pca_and_save(
     dataset_path: str,
     model_name: str,
-    split: str,
     target_dim: int,
     max_samples: int,
     output_path: str,
@@ -25,11 +24,18 @@ def fit_pca_and_save(
     assert max_samples > 0, "max_samples must be positive"
     os.makedirs(output_path, exist_ok=True)
 
-    dataset = get_precalculated_embeddings_dataset(
-        dataset_path=dataset_path,
-        model_name=model_name,
-        split=split,
+    # Load the precalculated embeddings
+    tensor_path = os.path.join(
+        PROJECT_ROOT,
+        "storage",
+        "precalculated_embeddings",
+        dataset_path.split("/")[-1],
+        model_name.replace("/", "__"),
+        "train_embeddings.pt"
     )
+    if not os.path.exists(dataset_path):
+        raise FileNotFoundError(f"Precalculated embeddings not found at {output_path}")
+    dataset = EmbeddingsDataset(torch.load(tensor_path))
 
     n_samples = min(max_samples, len(dataset))
     print(f"Loading {n_samples} embeddings")
@@ -81,7 +87,6 @@ def main():
         type=str,
         default="jinaai/jina-embeddings-v2-small-en",
     )
-    parser.add_argument("--split", type=str, default="train")
     parser.add_argument("--target_dim", type=int, default=32)
     parser.add_argument(
         "--max_samples",
@@ -95,7 +100,6 @@ def main():
     fit_pca_and_save(
         dataset_path=args.dataset_path,
         model_name=args.model_name,
-        split=args.split,
         target_dim=args.target_dim,
         max_samples=args.max_samples,
         output_path=os.path.join(

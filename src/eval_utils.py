@@ -251,11 +251,8 @@ def eval_intrinsic(
         "task_name": "IntrinsicEvaluation",
         "checkpoint": checkpoint,
         "spearman_loss": None,
-        "spearman_loss_weighted": None,
         "angular_loss": None,
-        "angular_loss_weighted": None,
         "positional_loss": None,
-        "positional_loss_weighted": None
     }
 
     test_embeddings_path = os.path.join(
@@ -284,28 +281,12 @@ def eval_intrinsic(
     )
     results["spearman_loss"] = spearman_loss.item()
 
-    spearman_loss_weighted = compute_spearman_loss(
-        low_dim_embeddings[:spearman_test_batch_size], 
-        high_dim_embeddings[:spearman_test_batch_size], 
-        training=False,
-        weighted=True,
-        local_or_global=spearman_local_or_global
-    )
-    results["spearman_loss_weighted"] = spearman_loss_weighted.item()
-
     angular_loss = compute_angular_loss(
         low_dim_embeddings=low_dim_embeddings,
         high_dim_embeddings=high_dim_embeddings,
         weighted=False
     )
     results["angular_loss"] = angular_loss.item()
-    
-    angular_loss_weighted = compute_angular_loss(
-        low_dim_embeddings=low_dim_embeddings,
-        high_dim_embeddings=high_dim_embeddings,
-        weighted=True
-    )
-    results["angular_loss_weighted"] = angular_loss_weighted.item()
 
     positional_loss = compute_positional_loss(
         low_dim_embeddings=low_dim_embeddings,
@@ -313,13 +294,6 @@ def eval_intrinsic(
         weighted=False
     )
     results["positional_loss"] = positional_loss.item()
-    
-    positional_loss_weighted = compute_positional_loss(
-        low_dim_embeddings=low_dim_embeddings,
-        high_dim_embeddings=high_dim_embeddings,
-        weighted=True
-    )
-    results["positional_loss_weighted"] = positional_loss_weighted.item()
 
     logger.info(
         f"Intrinsic results for {model_name}, checkpoint {checkpoint}: "

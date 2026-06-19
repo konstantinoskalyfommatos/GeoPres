@@ -5,9 +5,9 @@ import os
 import logging
 import json
 
-from utils.config import TRAINED_MODELS_PATH, EVALUATION_RESULTS_PATH, parse_dtype
-from utils.reduced_sentence_transformer import ReducedSentenceTransformer
-from utils.eval import evaluate_mteb, eval_intrinsic, find_checkpoint_lowest_val_loss
+from config import TRAINED_MODELS_PATH, EVALUATION_RESULTS_PATH, parse_dtype
+from reduced_sentence_transformer import ReducedSentenceTransformer
+from eval_utils import evaluate_mteb, eval_intrinsic, find_checkpoint_lowest_val_loss
 
 
 # Set random seed for reproducibility

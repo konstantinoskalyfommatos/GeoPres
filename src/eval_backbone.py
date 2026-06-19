@@ -3,9 +3,9 @@ from argparse import ArgumentParser
 import torch
 import logging
 import os
-from utils.config import EVALUATION_RESULTS_PATH, parse_dtype
+from config import EVALUATION_RESULTS_PATH, parse_dtype
 
-from utils.eval import evaluate_mteb
+from eval_utils import evaluate_mteb
 
 
 # Set random seed for reproducibility

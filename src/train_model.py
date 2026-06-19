@@ -1,9 +1,4 @@
-"""
-Main training script for reduced sentence transformers using the Sentence Transformers framework.
-
-This script provides a simplified, high-level interface for training reduced models
-that follows Sentence Transformers best practices and conventions.
-"""
+"""Main training script for training projections using GeoPres."""
 
 import os
 import argparse
@@ -17,10 +12,10 @@ from torch.utils.data import Dataset
 
 from transformers import TrainingArguments, EarlyStoppingCallback
 
-from utils.reduced_sentence_transformer import ReducedSentenceTransformer
-from utils.geopres_trainer import GeoPresTrainer, EmbeddingsDataset
-from utils.config import TRAINED_MODELS_PATH, EVALUATION_RESULTS_PATH, PROJECT_ROOT, parse_dtype
-from utils.eval import evaluate_mteb, eval_intrinsic, find_checkpoint_lowest_val_loss
+from reduced_sentence_transformer import ReducedSentenceTransformer
+from geopres_trainer import GeoPresTrainer, EmbeddingsDataset
+from config import TRAINED_MODELS_PATH, EVALUATION_RESULTS_PATH, PROJECT_ROOT, parse_dtype
+from eval_utils import evaluate_mteb, eval_intrinsic, find_checkpoint_lowest_val_loss
 
 
 # Setup logging
@@ -302,7 +297,9 @@ def main():
         "train_embeddings.pt"
     )
     if not os.path.exists(train_tensor_path):
-        raise FileNotFoundError(f"Precalculated embeddings not found at {train_tensor_path}")
+        raise FileNotFoundError(
+            f"Precalculated embeddings not found at {train_tensor_path}"
+        )
     train_dataset = EmbeddingsDataset(torch.load(train_tensor_path))
 
     # Load the precalculated validation embeddings
@@ -315,7 +312,9 @@ def main():
         "validation_embeddings.pt"
     )
     if not os.path.exists(val_tensor_path):
-        raise FileNotFoundError(f"Precalculated embeddings not found at {val_tensor_path}")
+        raise FileNotFoundError(
+            f"Precalculated embeddings not found at {val_tensor_path}"
+        )
     val_dataset = EmbeddingsDataset(torch.load(val_tensor_path))
 
     # Train the model

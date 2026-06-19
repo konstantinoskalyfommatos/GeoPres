@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 
 from huggingface_hub import login
 
-from utils.config import PROJECT_ROOT
+from config import PROJECT_ROOT
 
 load_dotenv()
 

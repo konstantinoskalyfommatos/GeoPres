@@ -2,7 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.patches import Patch
 import os
-from utils.config import EVALUATION_RESULTS_PATH, PROJECT_ROOT
+from config import EVALUATION_RESULTS_PATH, PROJECT_ROOT
 
 
 def get_desired_dimensions(model_name=None):

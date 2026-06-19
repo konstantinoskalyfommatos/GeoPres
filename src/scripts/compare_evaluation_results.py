@@ -6,11 +6,8 @@ from argparse import ArgumentParser
 
 INTRINSIC_METRICS = [
     "spearman_loss",
-    "spearman_loss_weighted",
     "angular_loss",
-    "angular_loss_weighted",
     "positional_loss",
-    "positional_loss_weighted",
 ]
 
 TASK_BENCHMARK_MAPPING = {

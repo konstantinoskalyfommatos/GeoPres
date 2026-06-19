@@ -5,9 +5,9 @@ import os
 import logging
 import sys
 
-from utils.config import EVALUATION_RESULTS_PATH, parse_dtype
-from utils.reduced_sentence_transformer import ReducedSentenceTransformer
-from utils.eval import eval_intrinsic, evaluate_mteb
+from config import EVALUATION_RESULTS_PATH, parse_dtype
+from reduced_sentence_transformer import ReducedSentenceTransformer
+from eval_utils import eval_intrinsic, evaluate_mteb
 
 
 # Set random seed for reproducibility
@@ -46,33 +46,33 @@ if __name__ == "__main__":
     if args.backbone_dtype:
         dtype = parse_dtype(args.backbone_dtype)
     
-    # Randomly select 32 distinct indices
-    indices = torch.randperm(args.source_dim)[:args.target_dim]
+    # Select first args.target_dim indices
+    indices = torch.arange(args.target_dim)
 
     # Create selection matrix
     M = torch.zeros(args.source_dim, args.target_dim)
     M[indices, torch.arange(args.target_dim)] = 1.0
-    
+
     projection_head = nn.Linear(args.source_dim, args.target_dim, bias=False)
     projection_head.weight = nn.Parameter(M.t())
     projection_head = projection_head.to("cuda")
-    
+
     print(projection_head)
 
     # Evaluate the model
     cache_path = os.path.join(
         EVALUATION_RESULTS_PATH,
-        "random_selection",
+        "truncation",
         args.backbone_model.replace("/", "__"),
     )
 
     model_name = os.path.join(
         f"{args.backbone_model}"
         f"_reduced_{args.target_dim}"
-        "_random_selection"
+        "_truncation"
     )
 
-    logger.info("Evaluating random selection on intrinsic test set")
+    logger.info("Evaluating truncation on intrinsic test set")
     projection_head.eval()
     eval_intrinsic(
         projection=projection_head,
@@ -85,7 +85,7 @@ if __name__ == "__main__":
     if args.intrinsic_only:
         sys.exit(0)
 
-    logger.info("Evaluating random selection on MTEB benchmark")
+    logger.info("Evaluating truncation on MTEB benchmark")
     custom_model = ReducedSentenceTransformer(
         model_name_or_path=args.backbone_model,
         projection=projection_head,

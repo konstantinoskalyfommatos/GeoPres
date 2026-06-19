@@ -1,13 +1,12 @@
 from argparse import ArgumentParser
 import torch
-import torch.nn as nn
 import os
 import logging
 
-from utils.config import TRAINED_AUTOENCODERS_PATH, EVALUATION_RESULTS_PATH, parse_dtype
-from utils.reduced_sentence_transformer import ReducedSentenceTransformer
-from utils.eval import evaluate_mteb, eval_intrinsic
-from scripts.train.train_autoencoder import Autoencoder
+from config import TRAINED_AUTOENCODERS_PATH, EVALUATION_RESULTS_PATH, parse_dtype
+from reduced_sentence_transformer import ReducedSentenceTransformer
+from eval_utils import evaluate_mteb, eval_intrinsic
+from baselines.train_autoencoder import Autoencoder
 
 
 # Set random seed for reproducibility

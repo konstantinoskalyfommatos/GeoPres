@@ -20,10 +20,10 @@ from torch.utils.data import Dataset, DataLoader
 
 from transformers import Trainer, TrainingArguments, EarlyStoppingCallback
 
-from utils.config import TRAINED_AUTOENCODERS_PATH, EVALUATION_RESULTS_PATH, PROJECT_ROOT, parse_dtype
-from utils.geopres_trainer import EmbeddingsDataset
-from utils.reduced_sentence_transformer import ReducedSentenceTransformer
-from utils.eval import evaluate_mteb, eval_intrinsic
+from config import TRAINED_AUTOENCODERS_PATH, EVALUATION_RESULTS_PATH, PROJECT_ROOT, parse_dtype
+from geopres_trainer import EmbeddingsDataset
+from reduced_sentence_transformer import ReducedSentenceTransformer
+from eval_utils import evaluate_mteb, eval_intrinsic
 
 
 # Setup logging

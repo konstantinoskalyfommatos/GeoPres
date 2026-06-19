@@ -3,7 +3,7 @@ from scipy.stats import spearmanr
 import os
 import json
 
-from utils.config import EVALUATION_RESULTS_PATH
+from config import EVALUATION_RESULTS_PATH
 
 
 def _get_extrinsic_model_names() -> set:

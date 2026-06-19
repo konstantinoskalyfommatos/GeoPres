@@ -4,7 +4,7 @@ import logging
 from transformers import Trainer, TrainingArguments
 from torch.utils.data import DataLoader, Dataset
 
-from utils.eval import (
+from eval_utils import (
     compute_positional_loss, 
     compute_angular_loss, 
     compute_spearman_loss

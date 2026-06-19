@@ -7,8 +7,8 @@ import torch
 
 from sklearn.decomposition import PCA
 
-from utils.geopres_trainer import EmbeddingsDataset
-from utils.config import PROJECT_ROOT
+from geopres_trainer import EmbeddingsDataset
+from config import PROJECT_ROOT
 
 
 def fit_pca_and_save(

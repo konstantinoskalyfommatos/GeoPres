@@ -3,7 +3,7 @@ Generate LaTeX tables with raw task scores for each backbone model.
 Produces output identical to tables.tex.
 
 Usage:
-    python src/scripts/general/generate_extrinsic_tables_raw_mteb.py
+    python src/scripts/generate_extrinsic_tables_raw_mteb.py
 
 Output:
     Prints LaTeX table code to stdout.

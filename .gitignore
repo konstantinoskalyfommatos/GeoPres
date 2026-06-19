@@ -5,9 +5,9 @@ nohup.out
 storage/optuna_results/
 storage/precalculated_embeddings/
 storage/evaluation_results/
-storage/autoencoders/
+storage/trained_autoencoders/
 storage/evaluation_results_trained_models_bad_checkpoints/
-storage/models/
+storage/trained_models/
 storage/plots/
 storage/pca/
 storage/available_tasks.txt

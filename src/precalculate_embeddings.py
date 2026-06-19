@@ -12,7 +12,7 @@ from tqdm import tqdm
 import logging
 
 from torch.utils.data import DataLoader, Dataset
-from utils.config import PROJECT_ROOT, parse_dtype
+from config import PROJECT_ROOT, parse_dtype
 
 
 os.environ["HF_HUB_DOWNLOAD_TIMEOUT"] = "300"  # 5 minutes

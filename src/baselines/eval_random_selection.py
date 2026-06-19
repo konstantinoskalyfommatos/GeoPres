@@ -5,32 +5,23 @@ import os
 import logging
 import sys
 
-from utils.config import EVALUATION_RESULTS_PATH, PROJECT_ROOT, parse_dtype
-from utils.reduced_sentence_transformer import ReducedSentenceTransformer
-from utils.eval import eval_intrinsic, evaluate_mteb
+from config import EVALUATION_RESULTS_PATH, parse_dtype
+from reduced_sentence_transformer import ReducedSentenceTransformer
+from eval_utils import eval_intrinsic, evaluate_mteb
 
 
+# Set random seed for reproducibility
 torch.manual_seed(42)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-class PCAProjection(nn.Module):
-    def __init__(self, mean_vector, projection_matrix):
-        super().__init__()
-        self.register_buffer('mean_vector', mean_vector)
-        self.register_buffer('projection_matrix', projection_matrix)
-    
-    def forward(self, x):
-        return (x - self.mean_vector) @ self.projection_matrix.T
-    
-
 if __name__ == "__main__":
     parser = ArgumentParser(description="Evaluate a reduced SentenceTransformer model on STSBenchmark")
     parser.add_argument("--backbone_model", type=str, default="jinaai/jina-embeddings-v2-small-en", help="Name or path of the backbone SentenceTransformer model")
     parser.add_argument("--source_dim", default=512, type=int)
-    
+
     parser.add_argument("--target_dim", type=int, default=32, help="Target dimension of the reduced embeddings")
     parser.add_argument("--skip_sts", action="store_true", help="Skip STS evaluation")
     parser.add_argument("--skip_classification", action="store_true", help="Skip classification evaluation")
@@ -50,43 +41,38 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     logger.info(f"Args: {args}")
-
+    
     dtype = None
     if args.backbone_dtype:
         dtype = parse_dtype(args.backbone_dtype)
+    
+    # Randomly select 32 distinct indices
+    indices = torch.randperm(args.source_dim)[:args.target_dim]
 
-    pca_matrix_path = os.path.join(
-        PROJECT_ROOT,
-        "storage",
-        "pca",
-        args.backbone_model.replace("/", "__"),
-        str(args.target_dim),
-    )
+    # Create selection matrix
+    M = torch.zeros(args.source_dim, args.target_dim)
+    M[indices, torch.arange(args.target_dim)] = 1.0
     
-    pca_file = [f for f in os.listdir(pca_matrix_path) if f.endswith(".pt")][0]
-    pca_filepath = os.path.join(pca_matrix_path, pca_file)
+    projection_head = nn.Linear(args.source_dim, args.target_dim, bias=False)
+    projection_head.weight = nn.Parameter(M.t())
+    projection_head = projection_head.to("cuda")
     
-    pca_state = torch.load(pca_filepath)
-    projection_matrix = pca_state["components"]  # Shape: (target_dim, backbone_dim)
-    mean_vector = pca_state["mean"]  # Shape: (backbone_dim,)
-    
-    projection_head = PCAProjection(mean_vector, projection_matrix).to("cuda")
     print(projection_head)
 
     # Evaluate the model
     cache_path = os.path.join(
         EVALUATION_RESULTS_PATH,
-        "pca_projection",
+        "random_selection",
         args.backbone_model.replace("/", "__"),
     )
 
     model_name = os.path.join(
         f"{args.backbone_model}"
         f"_reduced_{args.target_dim}"
-        "_pca"
+        "_random_selection"
     )
 
-    logger.info("Evaluating PCA projection on intrinsic test set")
+    logger.info("Evaluating random selection on intrinsic test set")
     projection_head.eval()
     eval_intrinsic(
         projection=projection_head,
@@ -99,7 +85,7 @@ if __name__ == "__main__":
     if args.intrinsic_only:
         sys.exit(0)
 
-    logger.info("Evaluating PCA projection on MTEB benchmark")
+    logger.info("Evaluating random selection on MTEB benchmark")
     custom_model = ReducedSentenceTransformer(
         model_name_or_path=args.backbone_model,
         projection=projection_head,
@@ -122,5 +108,4 @@ if __name__ == "__main__":
         fast_mode=args.fast_mode,
         overwrite_cache=args.overwrite_cache,
     )
-
-
+        

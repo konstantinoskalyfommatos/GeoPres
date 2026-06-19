@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Patch
 import numpy as np
 import os
-from utils.config import EVALUATION_RESULTS_PATH, PROJECT_ROOT
+from config import EVALUATION_RESULTS_PATH, PROJECT_ROOT
 
 
 def extract_embedding_dim(model_name):

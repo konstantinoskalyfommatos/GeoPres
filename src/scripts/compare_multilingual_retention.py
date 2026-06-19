@@ -17,7 +17,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-from utils.config import PROJECT_ROOT
+from config import PROJECT_ROOT
 
 # ---------------------------------------------------------------------------
 # Paths

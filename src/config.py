@@ -55,12 +55,12 @@ EVALUATION_RESULTS_PATH = os.path.join(
 TRAINED_MODELS_PATH = os.path.join(
     PROJECT_ROOT,
     "storage",
-    "models"
+    "trained_models"
 )
 
 
 TRAINED_AUTOENCODERS_PATH = os.path.join(
     PROJECT_ROOT,
     "storage",
-    "autoencoders"
+    "trained_autoencoders"
 )

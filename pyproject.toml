@@ -1,16 +1,14 @@
 [project]
-name = "thesis-project"
+name = "GeoPres"
 version = "0.1.0"
-description = "Thesis project - embedding distillation and intrinsic dimension analysis"
-requires-python = ">=3.10"
+description = "Embedding dimensionality reduction and evaluation."
+requires-python = ">=3.12,<3.13"
 dependencies = [
     "accelerate",
     "datasets",
-    "flash-attn",
     "matplotlib",
     "mteb",
     "numpy",
-    "optuna",
     "pandas",
     "python-dotenv",
     "pyyaml",
@@ -22,7 +20,11 @@ dependencies = [
     "torchsort",
     "tqdm",
     "transformers==4.57.6",
-    "umap-learn",
+]
+
+[project.optional-dependencies]
+flash-attn = [
+    "flash-attn>=2.5.0",
 ]
 
 [project.scripts]

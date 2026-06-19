@@ -22,10 +22,8 @@ $$\mathcal{L} = \frac{1}{\binom{m}{2}} \sum_{i < j}\left( d_{i,j} - d_{i,j}^{f} 
 - **Validation**: 10,000 paraphrase pairs (20,000 data points) from `agentlans/sentence-paraphrases`.
 
 # Prerequisites
-To set up the project, create a uv environment at the project root level using the following commands:
 ```bash
-uv venv .venv --python 3.12
-source .venv/bin/activate
+uv lock
 uv sync
 ```
 
@@ -45,3 +43,32 @@ For a persistent setup, add this to your shell configuration file (e.g., `~/.bas
 echo 'export PYTHONPATH="$(pwd)/src:$PYTHONPATH"' >> ~/.bashrc
 source ~/.bashrc
 ```
+
+# Common Issues
+
+## torchsort fails to install or build
+
+The default `uv lock && uv sync` installs `torchsort` from PyPI, which requires the CUDA toolchain to build from source. If the build fails (e.g., no CUDA runtime, unsupported platform), you can install a pre-built wheel manually from the [torchsort GitHub releases](https://github.com/teddykoker/torchsort/releases):
+
+```bash
+# torchsort version, supports >= 0.1.10
+export TORCHSORT=0.1.10
+# PyTorch version, supports pt26, pt25, pt24, pt21, pt20, and pt113 for versions
+# 2.6, 2.5, 2.4, 2.1, 2.0, and 1.13 respectively
+export TORCH=pt26
+# CUDA version, supports cpu, cu113, cu117, cu118, cu121, cu124, and cu126 for
+# CPU-only, CUDA 11.3, CUDA 11.7, CUDA 11.8, CUDA 12.1, CUDA 12.4, and CUDA 12.6
+# respectively
+export CUDA=cu126
+# Python version, supports cp310, cp311, and cp312 for versions 3.10, 3.11, and
+# 3.12 respectively
+export PYTHON=cp312
+
+uv pip install https://github.com/teddykoker/torchsort/releases/download/v${TORCHSORT}/torchsort-${TORCHSORT}+${TORCH}${CUDA}-${PYTHON}-${PYTHON}-linux_x86_64.whl
+```
+
+Adjust the variables above to match your PyTorch version, CUDA version, and Python version. Pre-built wheels are currently available on Linux only.
+
+## Alibaba-NLP/gte-multilingual-base model breaks with newer Transformers versions
+
+This project pins `transformers==4.57.6` for a reason. Upgrading to a more recent version causes issues with the mGTE model. If you override this pin, expect runtime errors when encoding with mGTE.

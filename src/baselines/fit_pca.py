@@ -8,7 +8,7 @@ import torch
 from sklearn.decomposition import PCA
 
 from geopres_trainer import EmbeddingsDataset
-from config import PROJECT_ROOT
+from config import STORAGE_PATH
 
 
 def fit_pca_and_save(
@@ -26,8 +26,7 @@ def fit_pca_and_save(
 
     # Load the precalculated embeddings
     tensor_path = os.path.join(
-        PROJECT_ROOT,
-        "storage",
+        STORAGE_PATH,
         "precalculated_embeddings",
         dataset_path.split("/")[-1],
         model_name.replace("/", "__"),
@@ -103,8 +102,7 @@ def main():
         target_dim=args.target_dim,
         max_samples=args.max_samples,
         output_path=os.path.join(
-            PROJECT_ROOT,
-            "storage",
+            STORAGE_PATH,
             "pca",
             args.model_name.replace("/", "__"),
             str(args.target_dim),

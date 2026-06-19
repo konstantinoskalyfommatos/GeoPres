@@ -42,25 +42,37 @@ if not PROJECT_ROOT:
     raise ValueError("PROJECT_ROOT environment variable not set")
 
 
-STORAGE_PATH = os.path.join(PROJECT_ROOT, "storage")
-
-
-EVALUATION_RESULTS_PATH = os.path.join(
-    PROJECT_ROOT,
-    "storage",
-    "evaluation_results"
+STORAGE_PATH = os.getenv(
+    "STORAGE_PATH",
+    os.path.join(PROJECT_ROOT, "storage")
 )
 
 
-TRAINED_MODELS_PATH = os.path.join(
-    PROJECT_ROOT,
-    "storage",
-    "trained_models"
+EVALUATION_RESULTS_PATH = os.getenv(
+    "EVALUATION_RESULTS_PATH",
+    os.path.join(
+        PROJECT_ROOT,
+        "storage",
+        "evaluation_results"
+    )
 )
 
 
-TRAINED_AUTOENCODERS_PATH = os.path.join(
-    PROJECT_ROOT,
-    "storage",
-    "trained_autoencoders"
+TRAINED_MODELS_PATH = os.getenv(
+    "TRAINED_MODELS_PATH",
+    os.path.join(
+        PROJECT_ROOT,
+        "storage",
+        "trained_models"
+    )
+)
+
+
+TRAINED_AUTOENCODERS_PATH = os.getenv(
+    "TRAINED_AUTOENCODERS_PATH",
+    os.path.join(
+        PROJECT_ROOT,
+        "storage",
+        "trained_autoencoders"
+    )
 )

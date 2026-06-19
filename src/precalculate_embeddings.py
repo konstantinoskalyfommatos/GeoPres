@@ -12,7 +12,7 @@ from tqdm import tqdm
 import logging
 
 from torch.utils.data import DataLoader, Dataset
-from config import PROJECT_ROOT, parse_dtype
+from config import STORAGE_PATH, parse_dtype
 
 
 os.environ["HF_HUB_DOWNLOAD_TIMEOUT"] = "300"  # 5 minutes
@@ -77,8 +77,8 @@ def precalculate_train_embeddings(
     logger.info("Precalculating training embeddings")
 
     output_base_path = os.path.join(
-        PROJECT_ROOT,
-        "storage/precalculated_embeddings",
+        STORAGE_PATH, 
+        "precalculated_embeddings",
         dataset_path.split("/")[-1],
         model_name.replace("/", "__")
     )
@@ -189,8 +189,8 @@ def precalculate_val_test_embeddings(
     """
     logger.info("Precalculating validation and test embeddings")
     output_base_path = os.path.join(
-        PROJECT_ROOT,
-        "storage/precalculated_embeddings",
+        STORAGE_PATH,
+        "precalculated_embeddings",
         dataset_path.split("/")[-1],
         model_name.replace("/", "__")
     )

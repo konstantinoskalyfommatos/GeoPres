@@ -20,7 +20,7 @@ from torch.utils.data import Dataset, DataLoader
 
 from transformers import Trainer, TrainingArguments, EarlyStoppingCallback
 
-from config import TRAINED_AUTOENCODERS_PATH, EVALUATION_RESULTS_PATH, PROJECT_ROOT, parse_dtype
+from config import TRAINED_AUTOENCODERS_PATH, EVALUATION_RESULTS_PATH, STORAGE_PATH, parse_dtype
 from geopres_trainer import EmbeddingsDataset
 from reduced_sentence_transformer import ReducedSentenceTransformer
 from eval_utils import evaluate_mteb, eval_intrinsic
@@ -330,8 +330,7 @@ def main():
     logger.info("Preparing datasets")
     # Load the precalculated training embeddings
     train_tensor_path = os.path.join(
-        PROJECT_ROOT,
-        "storage",
+        STORAGE_PATH,
         "precalculated_embeddings",
         "c4",
         args.backbone_model.replace("/", "__"),
@@ -343,8 +342,7 @@ def main():
 
     # Load the precalculated validation embeddings
     val_tensor_path = os.path.join(
-        PROJECT_ROOT,
-        "storage",
+        STORAGE_PATH,
         "precalculated_embeddings",
         "sentence-paraphrases",
         args.backbone_model.replace("/", "__"),

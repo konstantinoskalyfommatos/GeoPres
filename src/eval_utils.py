@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 
 from huggingface_hub import login
 
-from config import PROJECT_ROOT
+from config import STORAGE_PATH
 
 load_dotenv()
 
@@ -256,8 +256,7 @@ def eval_intrinsic(
     }
 
     test_embeddings_path = os.path.join(
-        PROJECT_ROOT,
-        "storage",
+        STORAGE_PATH,
         "precalculated_embeddings",
         dataset_name.split("/")[-1],
         backbone_model_path.replace("/", "__"),

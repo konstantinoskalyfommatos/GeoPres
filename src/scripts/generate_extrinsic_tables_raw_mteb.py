@@ -14,10 +14,17 @@ import numpy as np
 import sys
 import os
 
+from config import STORAGE_PATH
+
+
 # Add project root to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../..'))
 
-RESULTS_PATH = 'storage/evaluation_results/comparison_results.csv'
+RESULTS_PATH = os.path.join(
+    STORAGE_PATH,
+    'evaluation_results/comparison_results.csv'
+)
+
 
 # Task columns in order as they appear in the LaTeX table
 TASK_COLUMNS = [

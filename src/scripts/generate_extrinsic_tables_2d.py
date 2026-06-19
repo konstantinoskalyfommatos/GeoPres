@@ -1,6 +1,15 @@
 import pandas as pd
+import os
 
-df = pd.read_csv('storage/evaluation_results/comparison_results.csv')
+from config import STORAGE_PATH
+
+
+df = pd.read_csv(
+    os.path.join(
+        STORAGE_PATH,
+        'evaluation_results/comparison_results.csv'
+    )
+)
 df['Model'] = df['Model'].str.replace('/', '__', regex=False)
 
 extrinsic_cols = ['**AVG_MTEB**', '**AVG_STS**', '**AVG_RETRIEVAL**',

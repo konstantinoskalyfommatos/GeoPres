@@ -2,6 +2,7 @@ import os
 import json
 import pandas as pd
 from argparse import ArgumentParser
+from config import STORAGE_PATH
 
 
 INTRINSIC_METRICS = [
@@ -140,7 +141,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--results_base_path", 
         type=str, 
-        default="storage/evaluation_results", 
+        default=os.path.join(STORAGE_PATH, "evaluation_results"), 
         help="A directory that contains as subdirs result directories for multiple models"
     )
 

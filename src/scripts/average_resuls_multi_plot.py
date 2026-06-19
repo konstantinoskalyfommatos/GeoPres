@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Patch
 import numpy as np
 import os
-from config import EVALUATION_RESULTS_PATH, PROJECT_ROOT
+from config import EVALUATION_RESULTS_PATH, STORAGE_PATH
 
 
 def extract_embedding_dim(model_name):
@@ -262,7 +262,7 @@ if __name__ == "__main__":
     print("Creating multi-plot")
 
     RESULTS_PATH = os.path.join(EVALUATION_RESULTS_PATH, "comparison_results.csv")
-    PLOTS_PATH = os.path.join(PROJECT_ROOT, "storage/plots/")
+    PLOTS_PATH = os.path.join(STORAGE_PATH, "/plots/")
 
     os.makedirs(PLOTS_PATH, exist_ok=True)
 

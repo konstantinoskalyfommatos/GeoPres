@@ -14,7 +14,7 @@ from transformers import TrainingArguments, EarlyStoppingCallback
 
 from reduced_sentence_transformer import ReducedSentenceTransformer
 from geopres_trainer import GeoPresTrainer, EmbeddingsDataset
-from config import TRAINED_MODELS_PATH, EVALUATION_RESULTS_PATH, PROJECT_ROOT, parse_dtype
+from config import TRAINED_MODELS_PATH, EVALUATION_RESULTS_PATH, STORAGE_PATH, parse_dtype
 from eval_utils import evaluate_mteb, eval_intrinsic, find_checkpoint_lowest_val_loss
 
 
@@ -289,8 +289,7 @@ def main():
     logger.info("Preparing datasets")
     # Load the precalculated training embeddings
     train_tensor_path = os.path.join(
-        PROJECT_ROOT,
-        "storage",
+        STORAGE_PATH,
         "precalculated_embeddings",
         "c4",
         args.backbone_model.replace("/", "__"),
@@ -304,8 +303,7 @@ def main():
 
     # Load the precalculated validation embeddings
     val_tensor_path = os.path.join(
-        PROJECT_ROOT,
-        "storage",
+        STORAGE_PATH,
         "precalculated_embeddings",
         "sentence-paraphrases",
         args.backbone_model.replace("/", "__"),

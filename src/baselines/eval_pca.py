@@ -5,7 +5,7 @@ import os
 import logging
 import sys
 
-from config import EVALUATION_RESULTS_PATH, PROJECT_ROOT, parse_dtype
+from config import EVALUATION_RESULTS_PATH, STORAGE_PATH, parse_dtype
 from reduced_sentence_transformer import ReducedSentenceTransformer
 from eval_utils import eval_intrinsic, evaluate_mteb
 
@@ -56,8 +56,7 @@ if __name__ == "__main__":
         dtype = parse_dtype(args.backbone_dtype)
 
     pca_matrix_path = os.path.join(
-        PROJECT_ROOT,
-        "storage",
+        STORAGE_PATH,
         "pca",
         args.backbone_model.replace("/", "__"),
         str(args.target_dim),

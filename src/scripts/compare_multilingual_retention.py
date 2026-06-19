@@ -9,20 +9,17 @@ Descriptive analysis only --- no statistical tests.
 """
 
 import json
-import os
 import sys
 from pathlib import Path
 from typing import Any
-
-import numpy as np
 import pandas as pd
 
-from config import PROJECT_ROOT
+from config import STORAGE_PATH
 
 # ---------------------------------------------------------------------------
 # Paths
 # ---------------------------------------------------------------------------
-BASE = Path(PROJECT_ROOT) / "storage" / "evaluation_results"
+BASE = Path(STORAGE_PATH / "evaluation_results")
 TASK = "AmazonReviewsClassification.json"
 
 # ---------------------------------------------------------------------------
@@ -223,7 +220,7 @@ def main() -> None:
 
     analyse_retention(df)
 
-    output_dir = Path(PROJECT_ROOT) / "storage" / "evaluation_results"
+    output_dir = Path(STORAGE_PATH / "evaluation_results")
     output_dir.mkdir(parents=True, exist_ok=True)
 
     # Save raw data for downstream use

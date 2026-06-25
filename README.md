@@ -2,7 +2,9 @@
 Official implementation of GeoPres.
 
 # Formal Research Problem
-Given a function $g: X \rightarrow Y \subseteq \mathbb{R}^n$, where $X$ is an arbitrary set\footnote{In the present context, $X$ is a set of sentences, and $g$ maps these sentences into a vector space.} and $n$ is large, and given $k < n$, we are interested in a function $f^*: Y \rightarrow \mathbb{R}^k$, with the property that downstream task performance achieved by $f^* \circ g$ closely matches that of $g$. With such a function, for any $x \in X$, the embedding $f^*(g(x)) \in \mathbb{R}^k$ serves as a low-dimensional representative of $g(x) \in\mathbb{R}^n$, significantly reducing computational cost without substantial loss in task performance.
+Given a function $g: X \rightarrow Y \subseteq \mathbb{R}^n$, where $X$ is an arbitrary set and $n$ is large, and given $k < n$, we are interested in a function $f^*: Y \rightarrow \mathbb{R}^k$, with the property that downstream task performance achieved by $f^* \circ g$ closely matches that of $g$. With such a function, for any $x \in X$, the embedding $f^*(g(x)) \in \mathbb{R}^k$ serves as a low-dimensional representative of $g(x) \in \mathbb{R}^n$, significantly reducing computational cost without substantial loss in task performance.
+
+**Note:** In the present context, $g$ is an embedding model, $X$ is a set of sentences, and $g$ maps these sentences into a vector space.
 
 # Idea
 Our approach is straightforward: we generate a large collection of high-dimensional vectors using $g$, which serve as training data to approximate $f^*$ with a linear model $f(y) = W y$, optimized via backpropagation using a distance-preserving loss function. This approach rests on two assumptions: first, that a linear function with the desired properties exists; and second, that preserving intrinsic properties for a large set of vectors in the image of $g$ is predictive of downstream task performance.

@@ -2,7 +2,7 @@
 Official implementation of GeoPres.
 
 # Formal Research Problem
-Given a function $g: X \rightarrow Y \subseteq \mathbb{R}^n$, where $X$ is an arbitrary set and $n$ is large, and given $k < n$, we are interested in a function $f^*: Y \rightarrow \mathbb{R}^k$, with the property that downstream task performance achieved by $f^* \circ g$ closely matches that of $g$. With such a function, for any $x \in X$, the embedding $f^*(g(x)) \in \mathbb{R}^k$ serves as a low-dimensional representative of $g(x) \in \mathbb{R}^n$, significantly reducing computational cost without substantial loss in task performance.
+Given a function $g: X \to Y \subseteq \mathbb{R}^n$, where $X$ is an arbitrary set and $n$ is large, and given $k < n$, we are interested in a function $f^*: Y \to \mathbb{R}^k$, with the property that downstream task performance achieved by $f^* \circ g$ closely matches that of $g$. With such a function, for any $x \in X$, the embedding $f^*(g(x)) \in \mathbb{R}^k$ serves as a low-dimensional representative of $g(x) \in \mathbb{R}^n$, significantly reducing computational cost without substantial loss in task performance.
 
 **Note:** In the present context, $g$ is an embedding model, $X$ is a set of sentences, and $g$ maps these sentences into a vector space.
 

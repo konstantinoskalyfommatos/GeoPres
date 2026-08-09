@@ -25,31 +25,34 @@ $$\mathcal{L} = \frac{1}{\binom{m}{2}} \sum_{i < j}\left( d_{i,j} - d_{i,j}^{f} 
 
 # Prerequisites
 ```bash
-uv lock
 uv sync
 ```
 
-Then, create a `.env` file in the project root directory according to the `.env.example` file.
+Then, create a `.env` file in the project root directory from `.env.example` (edit paths to absolute values; `PROJECT_ROOT` is required):
+
+```bash
+cp .env.example .env
+```
 
 ## Environment Configuration
 
-To ensure the project modules are accessible, set the `PYTHONPATH` to include the `src` directory:
+To ensure the project modules are accessible, set the `PYTHONPATH` to include the `geopres` directory:
 
 ```bash
-export PYTHONPATH="$(pwd)/src:$PYTHONPATH"
+export PYTHONPATH="$(pwd)/geopres:$PYTHONPATH"
 ```
 
 For a persistent setup, add this to your shell configuration file (e.g., `~/.bashrc` or `~/.zshrc`):
 
 ```bash
-echo 'export PYTHONPATH="$(pwd)/src:$PYTHONPATH"' >> ~/.bashrc
+echo 'export PYTHONPATH="$(pwd)/geopres:$PYTHONPATH"' >> ~/.bashrc
 source ~/.bashrc
 ```
 
 # Project Structure
 
 ```
-src/
+geopres/
 ├── config.py                          # .env loader + path/dtype helpers (PROJECT_ROOT, STORAGE_PATH, …)
 ├── precalculate_embeddings.py         # one-time per backbone: encode C4 / sentence-paraphrases, dump .pt
 ├── train_model.py                     # main entry: trains the GeoPres linear projection (HF Trainer)
@@ -68,7 +71,7 @@ src/
 │   └── eval_autoencoder.py            # MTEB eval of the trained autoencoder
 └── scripts/                           # post-hoc analysis & reporting
     └── compare_evaluation_results.py  # the ONLY essential script here; merges MTEB caches into
-                                       # $EVALUATION_RESULTS_PATH/comparison_results.csv
+                                        # $EVALUATION_RESULTS_PATH/comparison_results.csv
 ```
 
 The pipeline is **precalculate → train → evaluate**:
@@ -84,10 +87,10 @@ The pipeline is **precalculate → train → evaluate**:
    MTEB through `eval_utils.evaluate_mteb`, which caches results under
    `$EVALUATION_RESULTS_PATH/`.
 4. `scripts/compare_evaluation_results.py` is the only required post-processing
-   step — it walks those MTEB caches and writes a single
-   `comparison_results.csv` (one row per backbone × method × task). All other
-   files under `src/scripts/` are exploratory LaTeX-table / plotting generators
-   and are not part of the core pipeline.
+    step — it walks those MTEB caches and writes a single
+    `comparison_results.csv` (one row per backbone × method × task). All other
+    files under `geopres/scripts/` are exploratory LaTeX-table / plotting generators
+    and are not part of the core pipeline.
 
 The end-to-end CLI recipes live in `AGENTS.md` under "Workflow: precalculate → train → evaluate".
 
@@ -95,7 +98,7 @@ The end-to-end CLI recipes live in `AGENTS.md` under "Workflow: precalculate →
 
 ## torchsort fails to install or build
 
-The default `uv lock && uv sync` installs `torchsort` from PyPI, which requires the CUDA toolchain to build from source. If the build fails (e.g., no CUDA runtime, unsupported platform), you can install a pre-built wheel manually from the [torchsort GitHub releases](https://github.com/teddykoker/torchsort/releases):
+The default `uv sync` installs `torchsort` from PyPI, which requires the CUDA toolchain to build from source. If the build fails (e.g., no CUDA runtime, unsupported platform), you can install a pre-built wheel manually from the [torchsort GitHub releases](https://github.com/teddykoker/torchsort/releases):
 
 ```bash
 # torchsort version, supports >= 0.1.10

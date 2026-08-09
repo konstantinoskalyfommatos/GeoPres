@@ -51,6 +51,11 @@ if __name__ == "__main__":
     args = parser.parse_args()
     logger.info(f"Args: {args}")
 
+    if not torch.cuda.is_available():
+        raise RuntimeError(
+            "CUDA is not available. This script requires a GPU."
+        )
+
     dtype = None
     if args.backbone_dtype:
         dtype = parse_dtype(args.backbone_dtype)
@@ -65,12 +70,12 @@ if __name__ == "__main__":
     pca_file = [f for f in os.listdir(pca_matrix_path) if f.endswith(".pt")][0]
     pca_filepath = os.path.join(pca_matrix_path, pca_file)
     
-    pca_state = torch.load(pca_filepath)
+    pca_state = torch.load(pca_filepath, weights_only=True)
     projection_matrix = pca_state["components"]  # Shape: (target_dim, backbone_dim)
     mean_vector = pca_state["mean"]  # Shape: (backbone_dim,)
     
     projection_head = PCAProjection(mean_vector, projection_matrix).to("cuda")
-    print(projection_head)
+    logger.info(f"PCA projection head:\n{projection_head}")
 
     # Evaluate the model
     cache_path = os.path.join(
@@ -79,7 +84,7 @@ if __name__ == "__main__":
         args.backbone_model.replace("/", "__"),
     )
 
-    model_name = os.path.join(
+    model_name = (
         f"{args.backbone_model}"
         f"_reduced_{args.target_dim}"
         "_pca"

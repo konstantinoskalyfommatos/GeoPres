@@ -6,14 +6,10 @@ from mteb.cache import ResultCache
 import logging
 import json
 import torchsort
-import json
-from dotenv import load_dotenv
 
 from huggingface_hub import login
 
 from config import STORAGE_PATH
-
-load_dotenv()
 
 
 # Set random seed for reproducibility
@@ -34,11 +30,17 @@ except Exception as e:
 
 def find_checkpoint_lowest_val_loss(trained_path: str) -> tuple[float, int]:
     """Find the checkpoint with the lowest validation loss."""
-    last_checkpoint = max([
-        int(d.split("checkpoint-")[-1])
-        for d in os.listdir(trained_path)
-        if d.startswith("checkpoint-")
-    ])
+    checkpoint_dirs = [
+        d for d in os.listdir(trained_path) if d.startswith("checkpoint-")
+    ]
+    if not checkpoint_dirs:
+        raise FileNotFoundError(
+            f"No checkpoints found in {trained_path}"
+        )
+
+    last_checkpoint = max(
+        int(d.split("checkpoint-")[-1]) for d in checkpoint_dirs
+    )
 
     with open(
         os.path.join(
@@ -268,7 +270,9 @@ def eval_intrinsic(
             f"Precalculated embeddings not found at {test_embeddings_path}"
         )
     
-    high_dim_embeddings: torch.Tensor = torch.load(test_embeddings_path).to("cuda")
+    high_dim_embeddings: torch.Tensor = torch.load(
+        test_embeddings_path, weights_only=True
+    ).to("cuda")
     low_dim_embeddings = projection(high_dim_embeddings)
 
     spearman_loss = compute_spearman_loss(

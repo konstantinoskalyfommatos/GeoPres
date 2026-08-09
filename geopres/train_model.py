@@ -39,10 +39,10 @@ def train_model(
     spearman_local_or_global: str,
     epochs: int = 10,
     optimizer_class: torch.optim.Optimizer = torch.optim.AdamW,
-    optimizer_params: dict[str, Any] = {'lr': 1e-2},
+    optimizer_params: dict[str, Any] | None = None,
     weight_decay: float = 0.00,
     output_path: str = None,
-    positional_loss_factor: int = 1,
+    positional_loss_factor: float = 1.0,
     lr_scheduler_type: str = "linear",
     warmup_ratio: float = 0.0,
     resume_from_checkpoint: str = None,
@@ -86,6 +86,8 @@ def train_model(
     )
 
     # Create optimizer
+    if optimizer_params is None:
+        optimizer_params = {'lr': 1e-2}
     optimizer = optimizer_class(trainable_projection.parameters(), **optimizer_params)
 
     # Initialize custom trainer
@@ -197,8 +199,8 @@ def main():
                        help="Number of training epochs")
     parser.add_argument("--learning_rate", type=float, default=1e-2,
                        help="Learning rate")
-    parser.add_argument("--positional_loss_factor", type=int, default=1,
-                       help="factor for positional vs similarity loss")
+    parser.add_argument("--positional_loss_factor", type=float, default=1.0,
+                        help="factor for positional vs similarity loss")
     parser.add_argument("--train_batch_size", type=int, default=20000,
                        help="Batch size for training")
     parser.add_argument("--val_batch_size", type=int, default=20000,
@@ -232,7 +234,12 @@ def main():
     parser.add_argument("--resume_from_checkpoint", action="store_true", help="Whether to resume training from the last checkpoint in the output directory")
 
     args = parser.parse_args()
-        
+
+    if not torch.cuda.is_available():
+        raise RuntimeError(
+            "CUDA is not available. This script requires a GPU."
+        )
+
     dtype = None
     if args.backbone_dtype:
         dtype = parse_dtype(args.backbone_dtype)
@@ -250,7 +257,7 @@ def main():
             f"{args.backbone_model}"
             f"_reduced_{args.target_dim}"
             f"_batch_{args.train_batch_size}"
-            f"{'_poslossfactor_' + str(int(args.positional_loss_factor))}"
+            f"_poslossfactor_{args.positional_loss_factor}"
             f"{'_' + args.custom_suffix if args.custom_suffix else ''}"
         )
     
@@ -275,7 +282,7 @@ def main():
                 for d in os.listdir(output_path)
                 if d.startswith("checkpoint-")
             ])
-        except Exception:
+        except ValueError:
             # No checkpoint found, start from scratch
             pass
 
@@ -299,7 +306,9 @@ def main():
         raise FileNotFoundError(
             f"Precalculated embeddings not found at {train_tensor_path}"
         )
-    train_dataset = EmbeddingsDataset(torch.load(train_tensor_path))
+    train_dataset = EmbeddingsDataset(
+        torch.load(train_tensor_path, weights_only=True)
+    )
 
     # Load the precalculated validation embeddings
     val_tensor_path = os.path.join(
@@ -313,7 +322,9 @@ def main():
         raise FileNotFoundError(
             f"Precalculated embeddings not found at {val_tensor_path}"
         )
-    val_dataset = EmbeddingsDataset(torch.load(val_tensor_path))
+    val_dataset = EmbeddingsDataset(
+        torch.load(val_tensor_path, weights_only=True)
+    )
 
     # Train the model
     logger.info("Starting training")

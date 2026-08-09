@@ -38,6 +38,11 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
+    if not torch.cuda.is_available():
+        raise RuntimeError(
+            "CUDA is not available. This script requires a GPU."
+        )
+
     dtype = None
     if args.backbone_dtype:
         dtype = parse_dtype(args.backbone_dtype)

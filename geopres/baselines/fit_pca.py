@@ -32,9 +32,13 @@ def fit_pca_and_save(
         model_name.replace("/", "__"),
         "train_embeddings.pt"
     )
-    if not os.path.exists(dataset_path):
-        raise FileNotFoundError(f"Precalculated embeddings not found at {output_path}")
-    dataset = EmbeddingsDataset(torch.load(tensor_path))
+    if not os.path.exists(tensor_path):
+        raise FileNotFoundError(
+            f"Precalculated embeddings not found at {tensor_path}"
+        )
+    dataset = EmbeddingsDataset(
+        torch.load(tensor_path, weights_only=True)
+    )
 
     n_samples = min(max_samples, len(dataset))
     print(f"Loading {n_samples} embeddings")

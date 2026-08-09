@@ -1,4 +1,5 @@
 from argparse import ArgumentParser
+import sys
 import torch
 import torch.nn as nn
 import os
@@ -23,7 +24,7 @@ if __name__ == "__main__":
     parser.add_argument("--source_dim", default=512, type=int)
     parser.add_argument("--target_dim", type=int, default=32, help="Target dimension of the reduced embeddings")
     parser.add_argument("--train_batch_size", type=int, help="Batch size used for training", default=20000)
-    parser.add_argument("--positional_loss_factor", type=int, default=1, help="factor for positional vs similarity loss")
+    parser.add_argument("--positional_loss_factor", type=float, default=1.0, help="factor for positional vs similarity loss")
     parser.add_argument("--skip_sts", action="store_true", help="Skip STS evaluation")
     parser.add_argument("--skip_classification", action="store_true", help="Skip classification evaluation")
     parser.add_argument("--skip_retrieval", action="store_true", help="Skip retrieval evaluation")
@@ -47,6 +48,11 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     logger.info(f"Args: {args}")
+
+    if not torch.cuda.is_available():
+        raise RuntimeError(
+            "CUDA is not available. This script requires a GPU."
+        )
 
     dtype = None
     if args.backbone_dtype:
@@ -72,7 +78,7 @@ if __name__ == "__main__":
             f"{args.backbone_model}"
             f"_reduced_{args.target_dim}"
             f"_batch_{args.train_batch_size}"
-            f"{'_poslossfactor_' + str(int(args.positional_loss_factor))}"
+            f"_poslossfactor_{args.positional_loss_factor}"
             f"{'_' + args.custom_suffix if args.custom_suffix else ''}"
         )
 
@@ -90,7 +96,9 @@ if __name__ == "__main__":
 
     best_model_path = os.path.join(trained_path, "best_model.pt")
     logger.info(f"Loading best model from: {best_model_path}")
-    projection_head.load_state_dict(torch.load(best_model_path, map_location="cuda"))
+    projection_head.load_state_dict(
+        torch.load(best_model_path, map_location="cuda", weights_only=True)
+    )
     projection_head.eval()
 
     # Intrinsic evaluation
@@ -105,7 +113,7 @@ if __name__ == "__main__":
         spearman_local_or_global=args.spearman_local_or_global,
     )
     if args.intrinsic_only:
-        exit()
+        sys.exit(0)
 
     # MTEB evaluation
     logger.info("Evaluating on MTEB benchmark")

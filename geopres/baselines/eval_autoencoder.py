@@ -1,4 +1,5 @@
 from argparse import ArgumentParser
+import sys
 import torch
 import os
 import logging
@@ -42,6 +43,11 @@ if __name__ == "__main__":
     args = parser.parse_args()
     logger.info(f"Args: {args}")
 
+    if not torch.cuda.is_available():
+        raise RuntimeError(
+            "CUDA is not available. This script requires a GPU."
+        )
+
     dtype = None
     if args.backbone_dtype:
         dtype = parse_dtype(args.backbone_dtype)
@@ -71,7 +77,9 @@ if __name__ == "__main__":
 
     best_model_path = os.path.join(trained_path, "best_model.pt")
     logger.info(f"Loading best model from: {best_model_path}")
-    autoencoder.load_state_dict(torch.load(best_model_path, map_location="cuda"))
+    autoencoder.load_state_dict(
+        torch.load(best_model_path, map_location="cuda", weights_only=True)
+    )
     autoencoder.eval()
 
     # Intrinsic evaluation
@@ -85,7 +93,7 @@ if __name__ == "__main__":
         spearman_test_batch_size=args.spearman_test_batch_size,
     )
     if args.intrinsic_only:
-        exit()
+        sys.exit(0)
 
     # MTEB evaluation
     logger.info("Evaluating on MTEB benchmark")

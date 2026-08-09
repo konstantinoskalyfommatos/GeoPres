@@ -41,7 +41,12 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     logger.info(f"Args: {args}")
-    
+
+    if not torch.cuda.is_available():
+        raise RuntimeError(
+            "CUDA is not available. This script requires a GPU."
+        )
+
     dtype = None
     if args.backbone_dtype:
         dtype = parse_dtype(args.backbone_dtype)
@@ -56,8 +61,8 @@ if __name__ == "__main__":
     projection_head = nn.Linear(args.source_dim, args.target_dim, bias=False)
     projection_head.weight = nn.Parameter(M.t())
     projection_head = projection_head.to("cuda")
-    
-    print(projection_head)
+
+    logger.info(f"Random selection head:\n{projection_head}")
 
     # Evaluate the model
     cache_path = os.path.join(
@@ -66,7 +71,7 @@ if __name__ == "__main__":
         args.backbone_model.replace("/", "__"),
     )
 
-    model_name = os.path.join(
+    model_name = (
         f"{args.backbone_model}"
         f"_reduced_{args.target_dim}"
         "_random_selection"

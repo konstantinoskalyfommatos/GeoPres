@@ -133,7 +133,7 @@ def train_autoencoder(
     backbone_model: str,
     epochs: int = 10,
     optimizer_class: torch.optim.Optimizer = torch.optim.AdamW,
-    optimizer_params: dict[str, Any] = {"lr": 1e-2},
+    optimizer_params: dict[str, Any] | None = None,
     weight_decay: float = 0.0,
     output_path: str = None,
     lr_scheduler_type: str = "linear",
@@ -172,6 +172,8 @@ def train_autoencoder(
         dataloader_pin_memory=True,
     )
 
+    if optimizer_params is None:
+        optimizer_params = {"lr": 1e-2}
     optimizer = optimizer_class(autoencoder.parameters(), **optimizer_params)
 
     trainer = AutoencoderTrainer(
@@ -290,6 +292,11 @@ def main():
 
     args = parser.parse_args()
 
+    if not torch.cuda.is_available():
+        raise RuntimeError(
+            "CUDA is not available. This script requires a GPU."
+        )
+
     dtype = None
     if args.backbone_dtype:
         dtype = parse_dtype(args.backbone_dtype)
@@ -313,12 +320,18 @@ def main():
 
     resume_checkpoint = None
     if args.resume_from_checkpoint:
-        last_checkpoint = max(
-            int(d.split("checkpoint-")[-1])
-            for d in os.listdir(output_path)
-            if d.startswith("checkpoint-")
-        )
-        resume_checkpoint = os.path.join(output_path, f"checkpoint-{last_checkpoint}")
+        try:
+            last_checkpoint = max(
+                int(d.split("checkpoint-")[-1])
+                for d in os.listdir(output_path)
+                if d.startswith("checkpoint-")
+            )
+            resume_checkpoint = os.path.join(
+                output_path, f"checkpoint-{last_checkpoint}"
+            )
+        except ValueError:
+            # No checkpoint found, start from scratch
+            pass
 
     logger.info("Creating autoencoder")
     autoencoder = Autoencoder(
@@ -338,7 +351,9 @@ def main():
     )
     if not os.path.exists(train_tensor_path):
         raise FileNotFoundError(f"Precalculated embeddings not found at {train_tensor_path}")
-    train_dataset = EmbeddingsDataset(torch.load(train_tensor_path))
+    train_dataset = EmbeddingsDataset(
+        torch.load(train_tensor_path, weights_only=True)
+    )
 
     # Load the precalculated validation embeddings
     val_tensor_path = os.path.join(
@@ -350,7 +365,9 @@ def main():
     )
     if not os.path.exists(val_tensor_path):
         raise FileNotFoundError(f"Precalculated embeddings not found at {val_tensor_path}")
-    val_dataset = EmbeddingsDataset(torch.load(val_tensor_path))
+    val_dataset = EmbeddingsDataset(
+        torch.load(val_tensor_path, weights_only=True)
+    )
 
     logger.info("Starting training")
     train_autoencoder(

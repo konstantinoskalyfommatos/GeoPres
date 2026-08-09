@@ -159,7 +159,7 @@ def precalculate_train_embeddings(
     all_embeddings = []
     for i in range(encode_every, total_seen + 1, encode_every):
         split_output_path = os.path.join(output_base_path, f"train_embeddings_{i}.pt")
-        embeddings = torch.load(split_output_path)
+        embeddings = torch.load(split_output_path, weights_only=True)
         all_embeddings.append(embeddings)
     
     all_embeddings = torch.cat(all_embeddings, dim=0)
@@ -261,6 +261,11 @@ if __name__ == "__main__":
     parser.add_argument("--encode_every", type=int, default=100000, help="Number of examples to encode before saving intermediate results")
 
     args = parser.parse_args()
+
+    if not torch.cuda.is_available():
+        raise RuntimeError(
+            "CUDA is not available. This script requires a GPU."
+        )
 
     dtype = None
     if args.backbone_dtype:

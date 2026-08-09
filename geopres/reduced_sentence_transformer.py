@@ -1,3 +1,4 @@
+import logging
 import torch
 import torch.nn as nn
 from mteb.models.model_meta import ModelMeta
@@ -5,6 +6,9 @@ from mteb.models.model_meta import ModelMeta
 from sentence_transformers import SentenceTransformer
 from safetensors.torch import load_file
 import os
+
+
+logger = logging.getLogger(__name__)
 
 
 class ProjectionHead(nn.Module):
@@ -111,9 +115,13 @@ class ReducedSentenceTransformer(SentenceTransformer):
         missing_keys, unexpected_keys = self.projection_head.load_state_dict(fixed_checkpoint, strict=False)
         
         if missing_keys:
-            print(f"Warning: Missing keys when loading checkpoint: {missing_keys}")
+            logger.warning(
+                f"Missing keys when loading checkpoint: {missing_keys}"
+            )
         if unexpected_keys:
-            print(f"Warning: Unexpected keys when loading checkpoint: {unexpected_keys}")
+            logger.warning(
+                f"Unexpected keys when loading checkpoint: {unexpected_keys}"
+            )
         
         self.to(self.device)
         return self

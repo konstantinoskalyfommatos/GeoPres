@@ -46,6 +46,51 @@ echo 'export PYTHONPATH="$(pwd)/src:$PYTHONPATH"' >> ~/.bashrc
 source ~/.bashrc
 ```
 
+# Project Structure
+
+```
+src/
+├── config.py                          # .env loader + path/dtype helpers (PROJECT_ROOT, STORAGE_PATH, …)
+├── precalculate_embeddings.py         # one-time per backbone: encode C4 / sentence-paraphrases, dump .pt
+├── train_model.py                     # main entry: trains the GeoPres linear projection (HF Trainer)
+├── eval_backbone.py                   # MTEB eval of a raw backbone (no projection), for reference
+├── eval_model.py                      # MTEB eval of a trained projection model from a checkpoint
+├── eval_utils.py                      # shared MTEB runner + intrinsic metrics (angular/positional/Spearman)
+├── geopres_trainer.py                 # HF Trainer subclass implementing the pairwise distance loss
+├── reduced_sentence_transformer.py    # SentenceTransformer wrapper that applies the learned linear W
+├── baselines/                         # alternative compression methods, all read the same precalculated .pt
+│   ├── fit_pca.py                     # fit PCA on precalculated embeddings → projection matrix
+│   ├── eval_pca.py                    # MTEB eval of PCA-projected embeddings
+│   ├── eval_random_projection.py      # random linear projection baseline
+│   ├── eval_random_selection.py       # random coordinate-selection baseline
+│   ├── eval_truncation.py             # coordinate truncation baseline
+│   ├── train_autoencoder.py           # train a nonlinear autoencoder baseline
+│   └── eval_autoencoder.py            # MTEB eval of the trained autoencoder
+└── scripts/                           # post-hoc analysis & reporting
+    └── compare_evaluation_results.py  # the ONLY essential script here; merges MTEB caches into
+                                       # $EVALUATION_RESULTS_PATH/comparison_results.csv
+```
+
+The pipeline is **precalculate → train → evaluate**:
+
+1. `precalculate_embeddings.py` encodes the C4 training corpus and the
+   `agentlans/sentence-paraphrases` validation/test splits with the chosen backbone
+   and dumps tensors to `$STORAGE_PATH/precalculated_embeddings/`.
+2. `train_model.py` (and `baselines/train_autoencoder.py` for the nonlinear baseline)
+   train a projection on those cached embeddings. `baselines/eval_*.py` /
+   `baselines/fit_pca.py` produce PCA / random-projection / random-selection /
+   truncation results the same way.
+3. `eval_model.py` and `eval_backbone.py` run each trained model / raw backbone on
+   MTEB through `eval_utils.evaluate_mteb`, which caches results under
+   `$EVALUATION_RESULTS_PATH/`.
+4. `scripts/compare_evaluation_results.py` is the only required post-processing
+   step — it walks those MTEB caches and writes a single
+   `comparison_results.csv` (one row per backbone × method × task). All other
+   files under `src/scripts/` are exploratory LaTeX-table / plotting generators
+   and are not part of the core pipeline.
+
+The end-to-end CLI recipes live in `AGENTS.md` under "Workflow: precalculate → train → evaluate".
+
 # Common Issues
 
 ## torchsort fails to install or build
